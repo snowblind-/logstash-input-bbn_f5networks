@@ -4,10 +4,6 @@
 # Proprietary and confidential
 # Written by Devops <devops-github@baffinbaynetworks.com>, March 2015
 ##########################################################################################
-# FILE DESCRIPTOR:
-# This plugin is written by Baffin Bay Networks and are being used for
-# receiving and parsing DDoS events from BIG-IP (F5 Networks).
-##########################################################################################
 
 Gem::Specification.new do |s|
   s.name = 'logstash-input-bbn_f5networks'
