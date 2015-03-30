@@ -20,18 +20,15 @@ require "concurrent_ruby"
 class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 	config_name "f5networks"
 
-	milestone 1
 	default :codec, "plain"
   
   	######################################################################################
   	# This section lists the configurable parameters for this plugin.
   	######################################################################################
 	# IP address to bind to input plugin
-	config :local_ip, :validate => :array, :default => [ "0.0.0.0" ]
-	# Remote IP's allowed to send events
-	config :remote_ip, :validate => :array, :default => [ "0.0.0.0" ]
+	config :log_collector_ip, :validate => :array, :default => "0.0.0.0"
 	# Port to bind to input plugin  
-	config :local_port, :validate => :number, :default => 514
+	config :log_collector_port, :validate => :number, :default => 514
 	# Timezone string should be "UTC" = +00.00
 	config :timezone, :validate => :string
 
