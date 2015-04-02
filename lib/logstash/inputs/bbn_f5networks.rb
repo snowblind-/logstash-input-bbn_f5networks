@@ -70,6 +70,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
 	def run(queue)
 
+    # TODO: We need to make sure we start UDP listener before the TCP listener if both are in the config variable, for
+    # now we leave it without validation as we can control the order in the .conf file.
+
     log_collector_protocol.each do |protocol|
 
       if protocol == "udp"
@@ -84,21 +87,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           server(:tcp, queue)
         end
 
-      else
-
-          # Unsupported protocol in array just log and error and exit
-          puts "unsupported protocol in array"
-
-          @logger.warn("Unsupported protocol in protocol array, doing nothing",
-                       :protocol => protocol
-          )
+        tcp_thread.join
 
       end
 
     end
-
-    #udp_thread.join
-    #tcp_thread.join
 
   end
   	
