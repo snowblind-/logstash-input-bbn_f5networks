@@ -71,25 +71,20 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 	def run(queue)
 
     puts log_collector_protocol.count
+
     log_collector_protocol.each do |protocol|
 
       if protocol == "udp"
 
-        puts "udp in array"
         udp_thread = Thread.new(queue) do |queue|
           server(:udp, queue)
         end
 
-        udp_thread.join
-
       elsif protocol == "tcp"
 
-        puts "tcp in array"
         tcp_thread = Thread.new(queue) do |queue|
           server(:tcp, queue)
         end
-
-        tcp_thread.join
 
       else
 
@@ -103,6 +98,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       end
 
     end
+
+    udp_thread.join
+    tcp_thread.join
 
   end
   	
