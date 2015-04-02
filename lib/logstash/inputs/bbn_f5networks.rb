@@ -19,7 +19,7 @@ require "concurrent_ruby"
 
 class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
-  config_name "f5networks"
+  config_name "bbn_f5networks"
 
 	default :codec, "plain"
 
@@ -70,6 +70,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
 	def run(queue)
 
+    puts log_collector_protocol.count
     log_collector_protocol.each do |protocol|
 
       if protocol == "udp"
