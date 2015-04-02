@@ -5,9 +5,6 @@
 # Written by Devops <devops-github@baffinbaynetworks.com>, March 2015
 ##########################################################################################
 
-
-# Test commit
-
 # Logstash specific dependencies
 require "logstash/inputs/base"
 require "logstash/namespace"
@@ -21,22 +18,24 @@ require "concurrent_ruby"
 
 
 class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
-	config_name "f5networks"
+
+  config_name "f5networks"
 
 	default :codec, "plain"
-  
-  	######################################################################################
-  	# This section lists the configurable parameters for this plugin.
-  	######################################################################################
+
 	# IP address to bind to input plugin
-	config :log_collector_ip, :validate => :array, :default => "0.0.0.0"
+	config :log_collector_ip, :validate => :string, :default => "0.0.0.0"
 	# Port to bind to input plugin  
 	config :log_collector_port, :validate => :number, :default => 514
+  # Protocol to use UDP/TCP or both
+  config :log_collector_protocol, :validate => :array, :default => [ "udp" ]
 	# Timezone string should be "UTC" = +00.00
-	config :timezone, :validate => :string
+	config :timezone, :validate => :string, :default => "UTC"
+  config :locale, :validate => :string
 
 	public
   	def initialize(params)
+
     	super
     	
     	@shutdown_requested = Concurrent::AtomicBoolean.new(false)
@@ -46,174 +45,202 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
 	public
 	def register
+
 		require "thread_safe"
-    	@grok_filter = LogStash::Filters::Grok.new(
-      		"overwrite" => "message",
-      		"match" => { "message" => "<%{POSINT:priority}>%{SYSLOGLINE}" },
-      		"tag_on_failure" => ["_grokparsefailure_sysloginput"],
-    	)
 
-    	@date_filter = LogStash::Filters::Date.new(
-      		"match" => [ "timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss", "ISO8601"],
-      		"locale" => @locale,
-      		"timezone" => @timezone,
-    	)
+    @grok_filter = LogStash::Filters::Grok.new(
+        "overwrite" => "message",
+      	"match" => { "message" => "<%{POSINT:priority}>%{SYSLOGLINE}" },
+      	"tag_on_failure" => ["_grokparsefailure_sysloginput"],
+    )
 
-    	@grok_filter.register
-    	@date_filter.register
+    @date_filter = LogStash::Filters::Date.new(
+        "match" => [ "timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss", "ISO8601"],
+      	"locale" => @locale,
+      	"timezone" => @timezone,
+    )
 
-    	@tcp_sockets = ThreadSafe::Array.new
-    	@tcp = @udp = nil
+    @grok_filter.register
+    @date_filter.register
+
+    @tcp_sockets = ThreadSafe::Array.new
+    @tcp = @udp = nil
 	
 	end
 
 	def run(queue)
-    	udp_thread = Thread.new(queue) do |queue|
-      		server(:udp, queue)
-    	end
 
-    	tcp_thread = Thread.new(queue) do |queue|
-      		server(:tcp, queue)
-      	end
+    log_collector_protocol.each do |protocol|
 
-    	udp_thread.join
-    	tcp_thread.join
-      
-  	end
+      if protocol == "udp"
+
+        puts "udp in array"
+        udp_thread = Thread.new(queue) do |queue|
+          server(:udp, queue)
+        end
+
+        udp_thread.join
+
+      elsif protocol == "tcp"
+
+        puts "tcp in array"
+        tcp_thread = Thread.new(queue) do |queue|
+          server(:tcp, queue)
+        end
+
+        tcp_thread.join
+
+      else
+
+          # Unsupported protocol in array just log and error and exit
+          puts "unsupported protocol in array"
+
+          @logger.warn("Unsupported protocol in protocol array, doing nothing",
+                       :protocol => protocol
+          )
+
+      end
+
+    end
+
+  end
   	
-  	private
-  	def server(protocol, queue)
-    	self.send("#{protocol}_listener", queue)
+  private
+  def server(protocol, queue)
+
+    self.send("#{protocol}_listener", queue)
   	
-  	rescue => e
-    	
-    	if @shutdown_requested.false?
-      		@logger.warn("listener died",
-      			:protocol => protocol,
-      			:address => "#{@host}:#{@port}",
-      			:exception => e,
-      			:backtrace => e.backtrace)
+  rescue => e
+    if @shutdown_requested.false?
+      @logger.warn("listener died",
+                   :protocol => protocol,
+                   :address => "#{@log_collector_ip}:#{@log_collector_port}",
+                   :exception => e,
+                   :backtrace => e.backtrace
+      )
       		
-      		sleep(5)
+      sleep(5)
       		
-      		retry
+      retry
     	
-    	end
+    end
 	
 	end
 	
 	private
-  	def udp_listener(queue)
-    	@logger.info("Starting f5network udp listener", :address => "#{@host}:#{@port}")
+  def udp_listener(queue)
 
-    	@udp.close if @udp
-    	@udp = UDPSocket.new(Socket::AF_INET)
-    	@udp.bind(@host, @port)
+    @logger.info("Starting f5network udp listener", :address => "#{@log_collector_ip}:#{@log_collector_port}")
 
-    	while true
-      		payload, client = @udp.recvfrom(9000)
-      		decode(client[3], queue, payload)
-    	end
-  	
-  	ensure
-    	
-    	close_udp
+    @udp.close if @udp
+    @udp = UDPSocket.new(Socket::AF_INET)
+    @udp.bind(@log_collector_ip, @log_collector_port)
+
+    while true
+      payload, client = @udp.recvfrom(9000)
+      decode(client[3], queue, payload)
+    end
+
+  ensure
+
+    close_udp
   
 	end
   
-  	private
+  private
 	def tcp_listener(queue)
-    	@logger.info("Starting f5network tcp listener", :address => "#{@host}:#{@port}")
-    	@tcp = TCPServer.new(@host, @port)
 
-    	loop do
-      		socket = @tcp.accept
-      		@tcp_sockets << socket
+    @logger.info("Starting f5network tcp listener", :address => "#{@log_collector_ip}:#{@log_collector_port}")
 
-      	break if @shutdown_requested.true?
+    @tcp = TCPServer.new(@log_collector_ip, @log_collector_port)
 
-      		Thread.new(queue, socket) do |queue, socket|
-        		tcp_receiver(queue, socket)
-      		end
+    loop do
+      socket = @tcp.accept
+      @tcp_sockets << socket
+
+      break if @shutdown_requested.true?
+
+      Thread.new(queue, socket) do |queue, socket|
+        tcp_receiver(queue, socket)
+      end
     
-    	end
+    end
   	
-  	ensure
+  ensure
     
-    	close_tcp
+    close_tcp
   	
-  	end
+  end
 
-  	def tcp_receiver(queue, socket)
-    
-    	ip, port = socket.peeraddr[3], socket.peeraddr[1]
-    	@logger.info("new connection", :client => "#{ip}:#{port}")
-    	LogStash::Util::set_thread_name("input|f5networks|tcp|#{ip}:#{port}}")
+  def tcp_receiver(queue, socket)
 
-    	socket.each { |line| decode(ip, queue, line) }
+    ip, port = socket.peeraddr[3], socket.peeraddr[1]
+    @logger.info("new connection", :client => "#{ip}:#{port}")
+    LogStash::Util::set_thread_name("input|f5networks|tcp|#{ip}:#{port}}")
+
+    socket.each { |line| decode(ip, queue, line) }
   	
 
 	# Catch connection reset exceptions, we don't want them to be passed up to the tcp_listener
-  	rescue Errno::ECONNRESET
+  rescue Errno::ECONNRESET
 
-  	ensure
-    
-    	@tcp_sockets.delete(socket)
-    	socket.close rescue nil
+    ensure
+      @tcp_sockets.delete(socket)
+      socket.close rescue nil
   
 	end
   
 	private
-  	def decode(host, queue, data)
+  def decode(host, queue, data)
     
-    	@codec.decode(data) do |event|
-      		decorate(event)
-      		event["host"] = host
-      		parse_event(event)
-      		queue << event
-    	end
+    @codec.decode(data) do |event|
+      decorate(event)
+      event["host"] = host
+      parse_event(event)
+      queue << event
+    end
 
   	# Catch decode related exceptions, not related to the socket
-  	rescue => e
+  rescue => e
     
-    	@logger.error("Error decoding data",
-    		:data => line.inspect,
-    		:exception => e,
-    		:backtrace => e.backtrace)
+    @logger.error("Error decoding data",
+                  :data => line.inspect,
+                  :exception => e,
+                  :backtrace => e.backtrace)
   
-  	end
+  end
   
-  	public
-  	def teardown
-    	
-    	@shutdown_requested.make_true
-    	close_udp
-    	close_tcp
-    	finished
-  
-  	end
+  public
+  def teardown
 
-  	private
-  	def close_udp
-    
-    	if @udp
-      		@udp.close_read rescue nil
-      		@udp.close_write rescue nil
-    	end
-    	
-    	@udp = nil
-    
-  	end
+    @shutdown_requested.make_true
+    close_udp
+    close_tcp
+    finished
+  
+  end
 
-  	private
-  	def close_tcp
+  private
+  def close_udp
     
-    	@tcp_sockets.each do |socket|
-      		socket.close rescue nil
-    	end
+    if @udp
+      @udp.close_read rescue nil
+      @udp.close_write rescue nil
+    end
+    	
+    @udp = nil
     
-    	@tcp.close if @tcp rescue nil
-    	@tcp = nil
+  end
+
+  private
+  def close_tcp
+    
+    @tcp_sockets.each do |socket|
+      socket.close rescue nil
+    end
+    
+    @tcp.close if @tcp rescue nil
+    @tcp = nil
   
   end
   
@@ -224,6 +251,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   # the missing pieces (host, priority, etc)
   public
   def parse_event(event)
+
     @grok_filter.filter(event)
 
     if event["tags"].nil? || !event["tags"].include?(@grok_filter.tag_on_failure)
