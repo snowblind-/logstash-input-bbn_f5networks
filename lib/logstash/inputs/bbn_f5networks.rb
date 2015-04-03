@@ -242,46 +242,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   public
   def parse_event(event)
 
-    puts event
-    
-    @grok_filter.filter(event)
 
-    if event["tags"].nil? || !event["tags"].include?(@grok_filter.tag_on_failure)
-      # Per RFC3164, priority = (facility * 8) + severity
-      #                       = (facility << 3) & (severity)
-      priority = event["priority"].to_i rescue 13
-      severity = priority & 7   # 7 is 111 (3 bits)
-      facility = priority >> 3
-      event["priority"] = priority
-      event["severity"] = severity
-      event["facility"] = facility
-
-      event["timestamp"] = event["timestamp8601"] if event.include?("timestamp8601")
-      @date_filter.filter(event)
-    else
-      @logger.info? && @logger.info("NOT SYSLOG", :message => event["message"])
-
-      # RFC3164 says unknown messages get pri=13
-      priority = 13
-      event["priority"] = 13
-      event["severity"] = 5   # 13 & 7 == 5
-      event["facility"] = 1   # 13 >> 3 == 1
-    end
-
-    # Apply severity and facility metadata if
-    # use_labels => true
-    if @use_labels
-      facility_number = event["facility"]
-      severity_number = event["severity"]
-
-      if @facility_labels[facility_number]
-        event["facility_label"] = @facility_labels[facility_number]
-      end
-
-      if @severity_labels[severity_number]
-        event["severity_label"] = @severity_labels[severity_number]
-      end
-    end
 	end
   
 end # class LogStash::Inputs::Example
