@@ -242,6 +242,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   public
   def parse_event(event)
 
+    puts event
+    
     @grok_filter.filter(event)
 
     if event["tags"].nil? || !event["tags"].include?(@grok_filter.tag_on_failure)
