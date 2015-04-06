@@ -246,25 +246,22 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       # Syslog format
 
-
     elsif message[0..2] == "CEF"
 
       # CEF format
 
       spl_message = message.split("|")
 
-      cef_vendor = spl_message[1]
-      cef_module = spl_message[2]
-      cef_attack = spl_message[5]
+      cef_hash["vendor"] = spl_message[1]
+      cef_hash["module"] = spl_message[2]
+      cef_hash["attack"] = spl_message[5]
       cef_data = spl_message[7]
-
-
 
       cef_data.scan(/[a-zA-Z0-9]+[=]+[a-zA-Z0-9:_\-\/\.\s]*(?=\s[a-zA-Z0-9]+[=]|$)/) do |cef_record|
 
         cef_entry = cef_record.split("=")
 
-        if cef_module == "Advanced Firewall Module"
+        if cef_hash["module"] == "Advanced Firewall Module"
 
 
             # Device Host Name, FQDN
@@ -301,29 +298,26 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
             # Dynamic CEF Entries
 
+            cef_dyn_hash[cef_entry[0]] = cef_entry[1]
+
+
           end
 
-
-        elsif cef_module == "ASM"
+        elsif cef_hash["module"] == "ASM"
 
         else
 
-
-
         end
 
-
       end
+
+      # Need to loop through the cef_dyn_hash
+
 
 
     else
 
-      @logger.info? && @logger.info("NOT A SUPPORTED FORMAT", :message => event["message"])
-      event << ""
-
     end
-
-
 
 	end
   
