@@ -233,16 +233,98 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     @tcp = nil
   
   end
-  
-  # Following RFC3164 where sane, we'll try to parse a received message
-  # as if you were relaying a syslog message to it.
-  # If the message cannot be recognized (see @grok_filter), we'll
-  # treat it like the whole event["message"] is correct and try to fill
-  # the missing pieces (host, priority, etc)
+
   public
   def parse_event(event)
+
+    cef_hash = Hash.new
+    cef_dyn_hash = Hash.new
+
+    message = event["message"]
+
+    if message[0..4] == "<134>"
+
+      # Syslog format
+
+
+    elsif message[0..2] == "CEF"
+
+      # CEF format
+
+      spl_message = message.split("|")
+
+      cef_vendor = spl_message[1]
+      cef_module = spl_message[2]
+      cef_attack = spl_message[5]
+      cef_data = spl_message[7]
+
+
+
+      cef_data.scan(/[a-zA-Z0-9]+[=]+[a-zA-Z0-9:_\-\/\.\s]*(?=\s[a-zA-Z0-9]+[=]|$)/) do |cef_record|
+
+        cef_entry = cef_record.split("=")
+
+        if cef_module == "Advanced Firewall Module"
+
+
+            # Device Host Name, FQDN
+          if cef_entry[0] == "dvchost" then cef_hash["bigip_hostname"] = cef_entry[1]
+
+            # Device IP
+          elsif cef_entry[0] == "dvc" then cef_hash["bigip_ip"] = cef_entry[1]
+
+            # Remote time
+          elsif cef_entry[0] == "rt" then cef_hash["remote_time"] = cef_entry[1]
+
+            # Action
+          elsif cef_entry[0] == "act" then cef_hash["mitigation_method"] = cef_entry[1]
+
+            # Attack Source IP
+          elsif cef_entry[0] == "src" then cef_hash["attack_source_ip"] = cef_entry[1]
+
+            # Attack Source Port
+          elsif cef_entry[0] == "spt" then cef_hash["attack_source_port"] = cef_entry[1]
+
+            # Attack Destination IP
+          elsif cef_entry[0] == "dst" then cef_hash["attack_destination_ip"] = cef_entry[1]
+
+            # Attack Destination Port
+          elsif cef_entry[0] == "dpt" then cef_hash["attack_destination_port"] = cef_entry[1]
+
+            # BIG-IP Route Domain
+          elsif cef_entry[0] == "F5RouteDomain" then cef_hash["route_domain"] = cef_entry[1]
+
+            # Belongs to TCP Flow ID
+          elsif cef_entry[0] == "F5FlowID" then cef_hash["tcp_flow_id"] = cef_entry[1]
+
+          else
+
+            # Dynamic CEF Entries
+
+          end
+
+
+        elsif cef_module == "ASM"
+
+        else
+
+
+
+        end
+
+
+      end
+
+
+    else
+
+      @logger.info? && @logger.info("NOT A SUPPORTED FORMAT", :message => event["message"])
+      event << ""
+
+    end
+
 
 
 	end
   
-end # class LogStash::Inputs::Example
+end # class LogStash::Inputs::F5Networks
