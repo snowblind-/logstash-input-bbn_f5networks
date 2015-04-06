@@ -313,7 +313,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       # Need to loop through the cef_dyn_hash
 
+      if cef_dyn_hash.lenght > 0
 
+
+
+      end
 
     else
 
