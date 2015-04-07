@@ -185,10 +185,16 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   def decode(host, queue, data)
     
     @codec.decode(data) do |event|
-      decorate(event)
-      event["host"] = host
-      parse_event(event)
-      queue << event.to_json
+
+      # In case BIG-IP is sending health status messages to the same port
+      if data == "default send string" then
+        next
+      end
+
+      parsed_event = parse_event(event)
+      new_event = LogStash::Event.new(parsed_event)
+      decorate(new_event)
+      queue << new_event
 
     end
 
