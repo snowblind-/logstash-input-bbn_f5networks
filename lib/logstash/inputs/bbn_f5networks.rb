@@ -354,7 +354,30 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         end
 
-        puts cef_dyn2_hash
+        if cef_dyn2_hash.has_key?("source_address") and cef_dyn2_hash["source_address"] == ""
+
+          if cef_hash.has_key?("attack_source_ip") and cef_hash["attack_source_ip"] != ""
+
+            cef_dyn2_hash["source_address"] = cef_hash["attack_source_ip"]
+
+          end
+
+        end
+
+        if cef_dyn2_hash.has_key?("destination_address") and cef_dyn2_hash["destination_address"] == ""
+
+          if cef_hash.has_key?("attack_destination_ip") and cef_hash["attack_destination_ip"] != ""
+
+            cef_dyn2_hash["destination_address"] = cef_hash["attack_destination_ip"]
+
+          end
+
+        end
+
+        cef_hash.merge!(cef_dyn2_hash)
+
+        puts cef_hash
+
 
       end
 
