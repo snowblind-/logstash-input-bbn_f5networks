@@ -15,6 +15,7 @@ require "logstash/filters/date"
 require "socket"
 require "date"
 require "concurrent_ruby"
+require "json"
 
 
 class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
@@ -246,6 +247,12 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       # Syslog format
 
+      cef_data.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9"\.\/=:_\s]*(?=\s[a-zA-Z0-9]+[=]|\])/) do |cef_record|
+
+
+
+      end
+
     elsif message[0..2] == "CEF"
 
       # CEF format
@@ -254,6 +261,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       cef_hash["vendor"] = spl_message[1]
       cef_hash["module"] = spl_message[2]
+      cef_hash["version"] = spl_message[3]
       cef_hash["attack"] = spl_message[5]
       cef_data = spl_message[7]
 
@@ -300,10 +308,31 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
             cef_dyn_hash[cef_entry[0]] = cef_entry[1]
 
-
           end
 
         elsif cef_hash["module"] == "ASM"
+
+          if cef_entry[0] == "dvchost" then cef_hash["bigip_hostname"] = cef_entry[1]
+
+            # Device IP
+          elsif cef_entry[0] == "dvc" then cef_hash["bigip_ip"] = cef_entry[1]
+
+            # Remote time
+          elsif cef_entry[0] == "rt" then cef_hash["remote_time"] = cef_entry[1]
+
+            # Action
+          elsif cef_entry[0] == "act" then cef_hash["mitigation_method"] = cef_entry[1]
+
+            # Attack Source IP
+          elsif cef_entry[0] == "src" and cef_entry[1] != nil then cef_hash["attack_source_ip"] = cef_entry[1]
+
+          else
+
+            # Dynamic CEF Entries
+
+            cef_dyn_hash[cef_entry[0]] = cef_entry[1]
+
+          end
 
         else
 
@@ -348,9 +377,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
             end
 
-
           end
-
 
         end
 
@@ -359,6 +386,10 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           if cef_hash.has_key?("attack_source_ip") and cef_hash["attack_source_ip"] != ""
 
             cef_dyn2_hash["source_address"] = cef_hash["attack_source_ip"]
+
+          else
+
+            cef_dyn2_hash.delete("source_address")
 
           end
 
@@ -376,8 +407,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         cef_hash.merge!(cef_dyn2_hash)
 
-        puts cef_hash
-
+        # return cef_hash.to_json
 
       end
 
