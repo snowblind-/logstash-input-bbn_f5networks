@@ -313,9 +313,48 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       # Need to loop through the cef_dyn_hash
 
-      if cef_dyn_hash.lenght > 0
+      if cef_dyn_hash.length > 0
+
+        cef_dyn2_hash = Hash.new
+
+        cef_dyn_hash.keys.sort
+
+        none_label_key = ""
+        none_label_value = ""
+
+        cef_dyn_hash.each do |key,value|
+
+          if key !~ /Label/
+
+            none_label_key = key
+            if value != nil
+              none_label_value = value
+            end
+
+            next
+
+          end
+
+          if key.include? "Label"
+
+            if (none_label_key + "Label") == key
+
+              cef_dyn2_hash[value] = none_label_value
+
+              none_label_key = ""
+              none_label_value = ""
+
+              next
+
+            end
 
 
+          end
+
+
+        end
+
+        puts cef_dyn2_hash
 
       end
 
