@@ -38,6 +38,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 	config :log_collector_port, :validate => :number, :default => 514
   # Protocol to use UDP/TCP or both
   config :log_collector_protocol, :validate => :array, :default => [ "udp" ]
+  # The default health string from BIG-IP
+  config :default_health_string, :validate => :string, :default => "default send string"
 	# Timezone string should be "UTC" = +00.00
 	config :timezone, :validate => :string, :default => "UTC"
   config :locale, :validate => :string
@@ -195,7 +197,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     @codec.decode(data) do |event|
 
       # In case BIG-IP is sending health status messages to the same port
-      if data == "default send string" then
+      if data == default_health_string then
         next
       end
 
