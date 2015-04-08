@@ -368,7 +368,12 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       @cef_hash["module"] = spl_message[2]
       @cef_hash["version"] = spl_message[3]
       @cef_hash["attack"] = spl_message[5]
+
       cef_data = spl_message[7]
+
+      if cef_data.length > 0
+        return @cef_hash.clear
+      end
 
       cef_data.scan(/[a-zA-Z0-9]+[=]+[a-zA-Z0-9:_\-\/\.\s]*(?=\s[a-zA-Z0-9]+[=]|$)/) do |cef_record|
 
@@ -445,7 +450,10 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           @cef_hash.clear
           @cef_hash["parser_error_no"] = 101
-          @cef_hash["parser_error_description"] = "Unknown module name in CEF description"
+          @cef_hash["parser_error_description"] = "Unknown module name in CEF descriptor"
+
+          # Log the first 32 characters
+          @logger.info("Unknown module name in CEF descriptor", :unknown_cef_module => "{module}:#{@cef_hash["module"]}")
 
           return @cef_hash
 
