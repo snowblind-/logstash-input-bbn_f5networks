@@ -1,5 +1,5 @@
 # logstash-input-bbn_f5networks
-Recives log messages from BIG-IP over Syslog/CEF and parses them and output json blobs
+Recives log messages from F5 BIG-IP over Syslog/CEF and parses them and output json blobs
 
 ## Installing a test system
 Easist way to test the plugin would be to install a Ubuntu server.
