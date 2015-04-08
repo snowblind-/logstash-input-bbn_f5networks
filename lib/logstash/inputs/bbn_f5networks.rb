@@ -369,9 +369,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       @cef_hash["version"] = spl_message[3]
       @cef_hash["attack"] = spl_message[5]
 
-      cef_data = spl_message[7]
-
-      if cef_data.length > 0
+      if spl_message.count == 8
+        cef_data = spl_message[7]
+      else
         return @cef_hash.clear
       end
 
