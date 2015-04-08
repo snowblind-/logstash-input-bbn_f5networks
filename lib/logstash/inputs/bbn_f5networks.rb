@@ -533,7 +533,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     else
 
       # Unknown data format
-
       @cef_hash.clear
       @cef_hash["parser_error_no"] = 100
       @cef_hash["parser_error_description"] = "Unknown log format"
