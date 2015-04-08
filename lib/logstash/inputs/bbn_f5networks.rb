@@ -82,7 +82,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 	def run(queue)
 
     # TODO: We need to make sure we start UDP listener before the TCP listener if both are in the config variable, for
-    # now we leave it without validation as we can control the order in the .conf file.
+    # now we leave it without validation as we can control the order in the .conf file...
 
     log_collector_protocol.each do |protocol|
 
