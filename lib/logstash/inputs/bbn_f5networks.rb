@@ -202,6 +202,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       end
 
       parsed_event = parse_event(event)
+
+      if parsed_event.has_key?("parser_error_no") || parsed_event.empty?
+        next
+      end
+
       new_event = LogStash::Event.new(parsed_event)
       decorate(new_event)
       queue << new_event
@@ -256,7 +261,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   def parse_event(event)
 
     @cef_hash = Hash.new
-    cef_dyn_hash = Hash.new
 
     message = event["message"]
 
@@ -345,7 +349,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         else
 
-            # Unknown cef_entry
+            # Unknown cef_entry log it so we know what we miss
+          @logger.info("Unexpected cef_entry", :unknown_cef_entry => "#{@cef_entry[0]}:#{@cef_entry[1]}")
 
         end
 
@@ -354,6 +359,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     elsif message[0..2] == "CEF"
 
       # CEF format
+
+      cef_dyn_hash = Hash.new
 
       spl_message = message.split("|")
 
@@ -434,6 +441,14 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         else
 
+          # Unknown module name
+
+          @cef_hash.clear
+          @cef_hash["parser_error_no"] = 101
+          @cef_hash["parser_error_description"] = "Unknown module name in CEF description"
+
+          return @cef_hash
+
         end
 
       end
@@ -510,6 +525,16 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     else
 
       # Unknown data format
+
+      @cef_hash.clear
+      @cef_hash["parser_error_no"] = 100
+      @cef_hash["parser_error_description"] = "Unknown log format"
+
+      # Log the first 32 characters
+      @logger.info("Unknown log format", :unknown_log_format => "{message}:#{message[0..31]}")
+
+      # Return the cef_hash hash containing the parser_error_no and description
+      return @cef_hash
 
     end
 
