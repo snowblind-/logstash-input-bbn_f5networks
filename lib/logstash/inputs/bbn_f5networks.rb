@@ -329,8 +329,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           # Attack ID
         elsif cef_entry[0] == "dos_attack_id" then @cef_hash["attack_id"] = cef_entry[1]
 
-          # Attack Event
-        elsif cef_entry[0] == "dos_attack_event" then @cef_hash["attack_event"] = cef_entry[1]
+          # Attack Event, Attack Started, Attack Sampled, Attack Stopped
+        elsif cef_entry[0] == "dos_attack_event" then @cef_hash["attack_status"] = cef_entry[1]
 
           # Attack Type
         elsif cef_entry[0] == "errdefs_msg_name" then @cef_hash["attack_type"] = cef_entry[1]
@@ -382,13 +382,13 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
         if @cef_hash["module"] == "Advanced Firewall Module"
 
 
-            # Device Host Name, FQDN
+            # Device Hostname, FQDN
           if cef_entry[0] == "dvchost" then @cef_hash["bigip_hostname"] = cef_entry[1]
 
             # Device IP
           elsif cef_entry[0] == "dvc" then @cef_hash["bigip_ip"] = cef_entry[1]
 
-            # Remote time
+            # Device time
           elsif cef_entry[0] == "rt" then @cef_hash["bigip_time"] = cef_entry[1]
 
             # Action
@@ -422,13 +422,14 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         elsif @cef_hash["module"] == "ASM"
 
+          # Device Hostname, FQDN
           if cef_entry[0] == "dvchost" then @cef_hash["bigip_hostname"] = cef_entry[1]
 
             # Device IP
           elsif cef_entry[0] == "dvc" then @cef_hash["bigip_ip"] = cef_entry[1]
 
-            # Remote time
-          elsif cef_entry[0] == "rt" then @cef_hash["remote_time"] = cef_entry[1]
+            # Device time
+          elsif cef_entry[0] == "rt" then @cef_hash["bigip_time"] = cef_entry[1]
 
             # Action
           elsif cef_entry[0] == "act" then @cef_hash["mitigation_method"] = cef_entry[1]
@@ -499,6 +500,35 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
             end
 
           end
+
+        end
+
+        if cef_dyn2_hash.has_key?("detection_mode") and cef_dyn2_hash["detection_mode"] == "TPS Increased"
+
+          # HTTP Flood (by TPS)
+
+          @cef_hash["mitigation_method"] = cef_dyn2_hash["attack"]
+          @cef_hash["detection_method"] = cef_dyn2_hash["detection_mode"]
+
+          @cef_hash["attack_name"] = "HTTP Flood (by TPS)"
+
+          # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
+
+          cef_dyn2_hash.delete("attack")
+          cef_dyn2_hash.delete["detection_mode"]
+
+        elsif cef_dyn2_hash.has_key?("detection_mode") and cef_dyn2_hash["detection_mode"] == "Latency Increased"
+
+          # HTTP Latency Symptom
+          @cef_hash["mitigation_method"] = cef_dyn2_hash["attack"]
+          @cef_hash["detection_method"] = cef_dyn2_hash["detection_mode"]
+
+          @cef_hash["attack_name"] = "HTTP Latency Symptom"
+
+          # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
+
+          cef_dyn2_hash.delete("attack")
+          cef_dyn2_hash.delete["detection_mode"]
 
         end
 
