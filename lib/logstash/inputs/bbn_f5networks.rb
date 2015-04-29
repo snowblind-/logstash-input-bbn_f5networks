@@ -510,7 +510,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           @cef_hash["mitigation_method"] = cef_dyn2_hash["attack"]
           @cef_hash["detection_method"] = cef_dyn2_hash["detection_mode"]
 
-          @cef_hash["attack_name"] = "HTTP Flood (by TPS)"
+          @cef_hash["attack_name"] = "HTTP Flood"
 
           # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
 
@@ -523,7 +523,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           @cef_hash["mitigation_method"] = cef_dyn2_hash["attack"]
           @cef_hash["detection_method"] = cef_dyn2_hash["detection_mode"]
 
-          @cef_hash["attack_name"] = "HTTP Latency Symptom"
+          @cef_hash["attack_name"] = "HTTP Response Latency"
 
           # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
 
