@@ -528,7 +528,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
 
           cef_dyn2_hash.delete("attack")
-          cef_dyn2_hash.delete["detection_mode"]
+          cef_dyn2_hash.delete("detection_mode")
 
         end
 
