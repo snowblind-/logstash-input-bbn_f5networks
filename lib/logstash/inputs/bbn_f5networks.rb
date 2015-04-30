@@ -503,35 +503,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         end
 
-        if cef_dyn2_hash.has_key?("detection_mode") and cef_dyn2_hash["detection_mode"] == "TPS Increased"
-
-          # HTTP Flood (by TPS)
-
-          @cef_hash["mitigation_method"] = cef_dyn2_hash["attack"]
-          @cef_hash["detection_method"] = cef_dyn2_hash["detection_mode"]
-
-          @cef_hash["attack_name"] = "HTTP Flood"
-
-          # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
-
-          cef_dyn2_hash.delete("attack")
-          cef_dyn2_hash.delete["detection_mode"]
-
-        elsif cef_dyn2_hash.has_key?("detection_mode") and cef_dyn2_hash["detection_mode"] == "Latency Increased"
-
-          # HTTP Latency Symptom
-          @cef_hash["mitigation_method"] = cef_dyn2_hash["attack"]
-          @cef_hash["detection_method"] = cef_dyn2_hash["detection_mode"]
-
-          @cef_hash["attack_name"] = "HTTP Response Latency"
-
-          # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
-
-          cef_dyn2_hash.delete("attack")
-          cef_dyn2_hash.delete("detection_mode")
-
-        end
-
         if cef_dyn2_hash.has_key?("source_address") and cef_dyn2_hash["source_address"] == ""
 
           if @cef_hash.has_key?("attack_source_ip") and @cef_hash["attack_source_ip"] != ""
@@ -557,6 +528,35 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
         end
 
         @cef_hash.merge!(cef_dyn2_hash)
+
+      end
+
+      if @cef_hash.has_key?("detection_mode") and @cef_hash["detection_mode"] == "TPS Increased"
+
+        # HTTP Flood (by TPS)
+
+        @cef_hash["mitigation_method"] = @cef_hash["attack"]
+        @cef_hash["detection_method"] = @cef_hash["detection_mode"]
+
+        @cef_hash["attack_name"] = "HTTP Flood"
+
+        # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
+
+        @cef_hash.delete("attack")
+        @cef_hash.delete("detection_mode")
+
+      elsif @cef_hash.has_key?("detection_mode") and @cef_hash["detection_mode"] == "Latency Increased"
+
+        # HTTP Latency Symptom
+        @cef_hash["mitigation_method"] = @cef_hash["attack"]
+        @cef_hash["detection_method"] = @cef_hash["detection_mode"]
+
+        @cef_hash["attack_name"] = "HTTP Response Latency"
+
+        # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
+
+        @cef_hash.delete("attack")
+        @cef_hash.delete("detection_mode")
 
       end
 
