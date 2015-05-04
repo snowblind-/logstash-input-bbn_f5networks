@@ -394,7 +394,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         if @cef_hash["bigip_virtual_server"] != "n/a"
 
-          @cef_hash["attack_mitigation_method"] = "Virtual Server Wide Rate Limiting"
+          @cef_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
 
         end
 
@@ -672,7 +672,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
             if @cef_hash["bigip_virtual_server"] != "n/a"
 
-              @cef_hash["attack_mitigation_method"] = "Virtual Server Wide Rate Limiting"
+              @cef_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
 
             end
 
