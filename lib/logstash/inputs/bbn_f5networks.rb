@@ -679,25 +679,25 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           puts "test"
 
-          cef_dyn_hash2.each do |key,value|
+          cef_dyn2_hash.each do |key,value|
 
-            if key == "geo_location" then @cef_hash["attack_geo_location_remote"] = value
+            if key == "geo_location" and value != nil then @cef_hash["attack_geo_location_remote"] = value
 
-            elsif key == "attack_status" then @cef_hash["attack_status"] = value
+            elsif key == "attack_status" and value != nil then @cef_hash["attack_status"] = value
 
-            elsif key == "attack_id" then @cef_hash["attack_id"] = value
+            elsif key == "attack_id" and value != nil then @cef_hash["attack_id"] = value
 
-            elsif key == "policy_apply_date" then @cef_hash["bigip_policy_apply_date"] = value
+            elsif key == "policy_apply_date" and value != nil then @cef_hash["bigip_policy_apply_date"] = value
 
-            elsif key == "Virtual Server" then @cef_hash["bigip_virtual_server"] = value
+            elsif key == "Virtual Server" and value != nil then @cef_hash["bigip_virtual_server"] = value
 
-            elsif key == "policy_name" then @cef_hash["bigip_dos_policy"] = value
+            elsif key == "policy_name" and value != nil then @cef_hash["bigip_dos_policy"] = value
 
-            elsif key == "detection_mode" then @cef_hash["attack_detection_method"] = value
+            elsif key == "detection_mode" and value != nil then @cef_hash["attack_detection_method"] = value
 
-            elsif key == "detection_average" then @cef_hash["attack_detection_rate"] = value
+            elsif key == "detection_average" and value != nil then @cef_hash["attack_detection_rate"] = value
 
-            elsif key == "dropped_requests" then @cef_hash["attack_drop_rate"] = value
+            elsif key == "dropped_requests" and value != nil then @cef_hash["attack_drop_rate"] = value
 
             else
 
