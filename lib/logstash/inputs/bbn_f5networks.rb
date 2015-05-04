@@ -284,31 +284,31 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
         ## GENERAL DEVICE INFO
 
         # Device vendor
-        if cef_entry[0] == "device_vendor" then @cef_hash["device_vendor"] = cef_entry[1]
+        if cef_entry[0] == "device_vendor" and cef_entry[1] != nil then @cef_hash["device_vendor"] = cef_entry[1]
 
           # Device module
-        elsif cef_entry[0] == "device_product" then @cef_hash["device_module"] = cef_entry[1]
+        elsif cef_entry[0] == "device_product" and cef_entry[1] != nil then @cef_hash["device_module"] = cef_entry[1]
 
           # Device Version
-        elsif cef_entry[0] == "device_version" then @cef_hash["device_version"] = cef_entry[1]
+        elsif cef_entry[0] == "device_version" and cef_entry[1] != nil then @cef_hash["device_version"] = cef_entry[1]
 
           # Device Hostname, FQDN
-        elsif cef_entry[0] == "hostname" then @cef_hash["device_hostname"] = cef_entry[1]
+        elsif cef_entry[0] == "hostname" and cef_entry[1] != nil then @cef_hash["device_hostname"] = cef_entry[1]
 
           # Device IP
-        elsif cef_entry[0] == "bigip_mgmt_ip" then @cef_hash["device_ip"] = cef_entry[1]
+        elsif cef_entry[0] == "bigip_mgmt_ip" and cef_entry[1] != nil then @cef_hash["device_ip"] = cef_entry[1]
 
           # Remote time
-        elsif cef_entry[0] == "date_time" then @cef_hash["device_time"] = cef_entry[1]
+        elsif cef_entry[0] == "date_time" and cef_entry[1] != nil then @cef_hash["device_time"] = cef_entry[1]
 
 
           ## F5 SPECIFIC INFO
 
           # BIG-IP Route Domain
-        elsif cef_entry[0] == "route_domain" then @cef_hash["bigip_route_domain"] = cef_entry[1]
+        elsif cef_entry[0] == "route_domain" and cef_entry[1] != nil then @cef_hash["bigip_route_domain"] = cef_entry[1]
 
           # BIG-IP Partition
-        elsif cef_entry[0] == "partition_name" then @cef_hash["bigip_partition"] = cef_entry[1]
+        elsif cef_entry[0] == "partition_name" and cef_entry[1] != nil then @cef_hash["bigip_partition"] = cef_entry[1]
 
           # BIG-IP Virtual Server
         elsif cef_entry[0] == "context_name" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = cef_entry[1]
@@ -316,62 +316,62 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           ## FLOW TABLE ID
 
           # Flow Table ID for Session
-        elsif cef_entry[0] == "flow_id" then @cef_hash["flow_table_id"] = cef_entry[1]
+        elsif cef_entry[0] == "flow_id" and cef_entry[1] != nil then @cef_hash["flow_table_id"] = cef_entry[1]
 
 
           ## ATTACK INFO
 
           # Attack Name
-        elsif cef_entry[0] == "dos_attack_name" then @cef_hash["attack_name"] = cef_entry[1]
+        elsif cef_entry[0] == "dos_attack_name" and cef_entry[1] != nil then @cef_hash["attack_name"] = cef_entry[1]
 
           # Attack ID
-        elsif cef_entry[0] == "dos_attack_id" then @cef_hash["attack_id"] = cef_entry[1]
+        elsif cef_entry[0] == "dos_attack_id" and cef_entry[1] != nil then @cef_hash["attack_id"] = cef_entry[1]
 
           # Attack Status, Attack Started, Attack Sampled, Attack Stopped
-        elsif cef_entry[0] == "dos_attack_event" then @cef_hash["attack_status"] = cef_entry[1]
+        elsif cef_entry[0] == "dos_attack_event" and cef_entry[1] != nil then @cef_hash["attack_status"] = cef_entry[1]
 
           # Packet Received
-        elsif cef_entry[0] == "dos_packets_received" then @cef_hash["attack_detection_rate"] = cef_entry[1]
+        elsif cef_entry[0] == "dos_packets_received" and cef_entry[1] != nil then @cef_hash["attack_detection_rate"] = cef_entry[1]
 
           # Packet Dropped
-        elsif cef_entry[0] == "dos_packets_dropped" then @cef_hash["attack_drop_rate"] = cef_entry[1]
+        elsif cef_entry[0] == "dos_packets_dropped" and cef_entry[1] != nil then @cef_hash["attack_drop_rate"] = cef_entry[1]
 
           # Action
-        elsif cef_entry[0] == "action" then @cef_hash["attack_mitigation_action"] = cef_entry[1]
+        elsif cef_entry[0] == "action" and cef_entry[1] != nil then @cef_hash["attack_mitigation_action"] = cef_entry[1]
 
           # Source IP
-        elsif cef_entry[0] == "source_ip" then @cef_hash["attack_source_ip"] = cef_entry[1]
+        elsif cef_entry[0] == "source_ip" and cef_entry[1] != nil then @cef_hash["attack_source_ip"] = cef_entry[1]
 
           # Source Port
-        elsif cef_entry[0] == "source_port" then @cef_hash["attack_source_port"] = cef_entry[1]
+        elsif cef_entry[0] == "source_port" and cef_entry[1] != nil then @cef_hash["attack_source_port"] = cef_entry[1]
 
           # Destination IP
-        elsif cef_entry[0] == "dest_ip" then @cef_hash["attack_destination_ip"] = cef_entry[1]
+        elsif cef_entry[0] == "dest_ip" and cef_entry[1] != nil then @cef_hash["attack_destination_ip"] = cef_entry[1]
 
           # Destination Port
-        elsif cef_entry[0] == "dest_port" then @cef_hash["attack_destination_port"] = cef_entry[1]
+        elsif cef_entry[0] == "dest_port" and cef_entry[1] != nil then @cef_hash["attack_destination_port"] = cef_entry[1]
 
           # Destination VLAN
-        elsif cef_entry[0] == "vlan" then @cef_hash["attack_destination_vlan"] = cef_entry[1]
+        elsif cef_entry[0] == "vlan" and cef_entry[1] != nil then @cef_hash["attack_destination_vlan"] = cef_entry[1]
 
           # Attack Severity
-        elsif cef_entry[0] == "severity" then @cef_hash["attack_severity"] = cef_entry[1]
+        elsif cef_entry[0] == "severity" and cef_entry[1] != nil then @cef_hash["attack_severity"] = cef_entry[1]
 
           # Attack Category e.g Network DoS Event
-        elsif cef_entry[0] == "errdefs_msg_name" then @cef_hash["attack_category"] = cef_entry[1]
+        elsif cef_entry[0] == "errdefs_msg_name" and cef_entry[1] != nil then @cef_hash["attack_category"] = cef_entry[1]
 
           # Traffic Stats entries
-        elsif cef_entry[0] == "traffic_stat_type" then @cef_hash["traffic_stat_type"] = cef_entry[1]
+        elsif cef_entry[0] == "traffic_stat_type" and cef_entry[1] != nil then @cef_hash["traffic_stat_type"] = cef_entry[1]
 
-        elsif cef_entry[0] == "traffic_stat_cnt" then @cef_hash["traffic_stat_count"] = cef_entry[1]
+        elsif cef_entry[0] == "traffic_stat_cnt" and cef_entry[1] != nil then @cef_hash["traffic_stat_count"] = cef_entry[1]
 
-        elsif cef_entry[0] == "cookie_challenge_issued" then @cef_hash["cookie_challenge_issued"] = cef_entry[1]
+        elsif cef_entry[0] == "cookie_challenge_issued" and cef_entry[1] != nil then @cef_hash["cookie_challenge_issued"] = cef_entry[1]
 
-        elsif cef_entry[0] == "cookie_challenge_passed" then @cef_hash["cookie_challenge_passed"] = cef_entry[1]
+        elsif cef_entry[0] == "cookie_challenge_passed" and cef_entry[1] != nil then @cef_hash["cookie_challenge_passed"] = cef_entry[1]
 
-        elsif cef_entry[0] == "cookie_flow_accepted" then @cef_hash["cookie_flow_accepted"] = cef_entry[1]
+        elsif cef_entry[0] == "cookie_flow_accepted" and cef_entry[1] != nil then @cef_hash["cookie_flow_accepted"] = cef_entry[1]
 
-        elsif cef_entry[0] == "cookie_flow_rejected" then @cef_hash["cookie_flow_rejected"] = cef_entry[1]
+        elsif cef_entry[0] == "cookie_flow_rejected" and cef_entry[1] != nil then @cef_hash["cookie_flow_rejected"] = cef_entry[1]
 
           # Attack Type ID, we don't collect this so do next
         elsif cef_entry[0] == "errdefs_msgno" then next
@@ -385,7 +385,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       end
 
-      if @cef_hash["attack_name"] == nil and @cef_hash["attack_status"] == "TCP Syncookie"
+      if @cef_hash["attack_name"] == "n/a" and @cef_hash["attack_status"] == "TCP Syncookie"
 
         @cef_hash["attack_name"] = "TCP SYN flood"
 
@@ -470,34 +470,34 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           @cef_hash["attack_category"] = "Network DoS Event"
 
           # Device Hostname, FQDN
-          if cef_entry[0] == "dvchost" then @cef_hash["device_hostname"] = cef_entry[1]
+          if cef_entry[0] == "dvchost" and cef_entry[1] != nil then @cef_hash["device_hostname"] = cef_entry[1]
 
             # Device IP
-          elsif cef_entry[0] == "dvc" then @cef_hash["device_ip"] = cef_entry[1]
+          elsif cef_entry[0] == "dvc" and cef_entry[1] != nil then @cef_hash["device_ip"] = cef_entry[1]
 
             # Device time
-          elsif cef_entry[0] == "rt" then @cef_hash["device_time"] = cef_entry[1]
+          elsif cef_entry[0] == "rt" and cef_entry[1] != nil then @cef_hash["device_time"] = cef_entry[1]
 
             # BIG-IP Route Domain
-          elsif cef_entry[0] == "F5RouteDomain" then @cef_hash["bigip_route_domain"] = cef_entry[1]
+          elsif cef_entry[0] == "F5RouteDomain" and cef_entry[1] != nil then @cef_hash["bigip_route_domain"] = cef_entry[1]
 
             # Belongs to TCP Flow ID
-          elsif cef_entry[0] == "F5FlowID" then @cef_hash["flow_table_id"] = cef_entry[1]
+          elsif cef_entry[0] == "F5FlowID" and cef_entry[1] != nil then @cef_hash["flow_table_id"] = cef_entry[1]
 
             # Action
-          elsif cef_entry[0] == "act" then @cef_hash["attack_mitigation_action"] = cef_entry[1]
+          elsif cef_entry[0] == "act" and cef_entry[1] != nil then @cef_hash["attack_mitigation_action"] = cef_entry[1]
 
             # Attack Source IP
-          elsif cef_entry[0] == "src" then @cef_hash["attack_source_ip"] = cef_entry[1]
+          elsif cef_entry[0] == "src" and cef_entry[1] != nil then @cef_hash["attack_source_ip"] = cef_entry[1]
 
             # Attack Source Port
-          elsif cef_entry[0] == "spt" then @cef_hash["attack_source_port"] = cef_entry[1]
+          elsif cef_entry[0] == "spt" and cef_entry[1] != nil then @cef_hash["attack_source_port"] = cef_entry[1]
 
             # Attack Destination IP
-          elsif cef_entry[0] == "dst" then @cef_hash["attack_destination_ip"] = cef_entry[1]
+          elsif cef_entry[0] == "dst" and cef_entry[1] != nil then @cef_hash["attack_destination_ip"] = cef_entry[1]
 
             # Attack Destination Port
-          elsif cef_entry[0] == "dpt" then @cef_hash["attack_destination_port"] = cef_entry[1]
+          elsif cef_entry[0] == "dpt" and cef_entry[1] != nil then @cef_hash["attack_destination_port"] = cef_entry[1]
 
           else
 
@@ -512,16 +512,16 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           @cef_hash["attack_category"] = "Application DoS Event"
 
           # Device Hostname, FQDN
-          if cef_entry[0] == "dvchost" then @cef_hash["bigip_hostname"] = cef_entry[1]
+          if cef_entry[0] == "dvchost" and cef_entry[1] != nil then @cef_hash["bigip_hostname"] = cef_entry[1]
 
             # Device IP
-          elsif cef_entry[0] == "dvc" then @cef_hash["bigip_ip"] = cef_entry[1]
+          elsif cef_entry[0] == "dvc" and cef_entry[1] != nil then @cef_hash["bigip_ip"] = cef_entry[1]
 
             # Device time
-          elsif cef_entry[0] == "rt" then @cef_hash["bigip_time"] = cef_entry[1]
+          elsif cef_entry[0] == "rt" and cef_entry[1] != nil then @cef_hash["bigip_time"] = cef_entry[1]
 
             # Action
-          elsif cef_entry[0] == "act" then @cef_hash["attack_mitigation_action"] = cef_entry[1]
+          elsif cef_entry[0] == "act" and cef_entry[1] != nil then @cef_hash["attack_mitigation_action"] = cef_entry[1]
 
             # Attack Source IP
           elsif cef_entry[0] == "src" and cef_entry[1] != nil then @cef_hash["attack_source_ip"] = cef_entry[1]
@@ -601,33 +601,33 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           cef_dyn2_hash.each do |key,value|
 
-            if key == "dos_packets_received" then @cef_hash["attack_detection_rate"] = value
+            if key == "dos_packets_received" and cef_entry[1] != nil then @cef_hash["attack_detection_rate"] = value
 
-            elsif key == "dos_packets_dropped" then @cef_hash["attack_drop_rate"] = value
+            elsif key == "dos_packets_dropped" and cef_entry[1] != nil then @cef_hash["attack_drop_rate"] = value
 
-            elsif key == "virtual_name" then @cef_hash["bigip_virtual_server"] = value
+            elsif key == "virtual_name" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = value
 
-            elsif key == "vlan" then @cef_hash["attack_destination_vlan"] = value
+            elsif key == "vlan" and cef_entry[1] != nil then @cef_hash["attack_destination_vlan"] = value
 
-            elsif key == "attack_id" then @cef_hash["attack_id"] = value
+            elsif key == "attack_id" and cef_entry[1] != nil then @cef_hash["attack_id"] = value
 
-            elsif key == "attack_status" then @cef_hash["attack_status"] = value
+            elsif key == "attack_status" and cef_entry[1] != nil then @cef_hash["attack_status"] = value
 
-            elsif key == "context_name" then @cef_hash["bigip_virtual_server"] = value
+            elsif key == "context_name" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = value
 
-            elsif key == "traffic_stat_type" then @cef_hash["attack_status"] = value
+            elsif key == "traffic_stat_type" and cef_entry[1] != nil then @cef_hash["attack_status"] = value
 
-            elsif key == "traffic_stat_type" then @cef_hash["traffic_stat_type"] = value
+            elsif key == "traffic_stat_type" and cef_entry[1] != nil then @cef_hash["traffic_stat_type"] = value
 
-            elsif key == "traffic_stat_cnt" then @cef_hash["traffic_stat_count"] = value
+            elsif key == "traffic_stat_cnt" and cef_entry[1] != nil then @cef_hash["traffic_stat_count"] = value
 
-            elsif key == "cookie_challenge_issued" then @cef_hash["cookie_challenge_issued"] = value
+            elsif key == "cookie_challenge_issued" and cef_entry[1] != nil then @cef_hash["cookie_challenge_issued"] = value
 
-            elsif key == "cookie_challenge_passed" then @cef_hash["cookie_challenge_passed"] = value
+            elsif key == "cookie_challenge_passed" and cef_entry[1] != nil then @cef_hash["cookie_challenge_passed"] = value
 
-            elsif key == "cookie_flow_accepted" then @cef_hash["cookie_flow_accepted"] = value
+            elsif key == "cookie_flow_accepted" and cef_entry[1] != nil then @cef_hash["cookie_flow_accepted"] = value
 
-            elsif key == "cookie_flow_rejected" then @cef_hash["cookie_flow_rejected"] = value
+            elsif key == "cookie_flow_rejected" and cef_entry[1] != nil then @cef_hash["cookie_flow_rejected"] = value
 
             else
 
@@ -637,7 +637,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           end
 
-          if @cef_hash["attack_name"] == "" and @cef_hash["attack_status"] == "TCP Syncookie"
+          if @cef_hash["attack_name"] == "n/a" and @cef_hash["attack_status"] == "TCP Syncookie"
 
             @cef_hash["attack_name"] = "TCP SYN flood"
 
@@ -679,23 +679,23 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           cef_dyn_hash2.each do |key,value|
 
-            if key == "geo_location" then @cef_hash["attack_geo_location_remote"] = value
+            if key == "geo_location" and cef_entry[1] != nil then @cef_hash["attack_geo_location_remote"] = value
 
-            elsif key == "attack_status" then @cef_hash["attack_status"] = value
+            elsif key == "attack_status" and cef_entry[1] != nil then @cef_hash["attack_status"] = value
 
-            elsif key == "attack_id" then @cef_hash["attack_id"] = value
+            elsif key == "attack_id" and cef_entry[1] != nil then @cef_hash["attack_id"] = value
 
-            elsif key == "policy_apply_date" then @cef_hash["bigip_policy_apply_date"] = value
+            elsif key == "policy_apply_date" and cef_entry[1] != nil then @cef_hash["bigip_policy_apply_date"] = value
 
-            elsif key == "Virtual Server" then @cef_hash["bigip_virtual_server"] = value
+            elsif key == "Virtual Server" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = value
 
-            elsif key == "policy_name" then @cef_hash["bigip_dos_policy"] = value
+            elsif key == "policy_name" and cef_entry[1] != nil then @cef_hash["bigip_dos_policy"] = value
 
-            elsif key == "detection_mode" then @cef_hash["attack_detection_method"] = value
+            elsif key == "detection_mode" and cef_entry[1] != nil then @cef_hash["attack_detection_method"] = value
 
-            elsif key == "detection_average" then @cef_hash["attack_detection_rate"] = value
+            elsif key == "detection_average" and cef_entry[1] != nil then @cef_hash["attack_detection_rate"] = value
 
-            elsif key == "dropped_requests" then @cef_hash["attack_drop_rate"] = value
+            elsif key == "dropped_requests" and cef_entry[1] != nil then @cef_hash["attack_drop_rate"] = value
 
             else
 
