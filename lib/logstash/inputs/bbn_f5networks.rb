@@ -512,13 +512,13 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           @cef_hash["attack_category"] = "Application DoS Event"
 
           # Device Hostname, FQDN
-          if cef_entry[0] == "dvchost" and cef_entry[1] != nil then @cef_hash["bigip_hostname"] = cef_entry[1]
+          if cef_entry[0] == "dvchost" and cef_entry[1] != nil then @cef_hash["device_hostname"] = cef_entry[1]
 
             # Device IP
-          elsif cef_entry[0] == "dvc" and cef_entry[1] != nil then @cef_hash["bigip_ip"] = cef_entry[1]
+          elsif cef_entry[0] == "dvc" and cef_entry[1] != nil then @cef_hash["device_ip"] = cef_entry[1]
 
             # Device time
-          elsif cef_entry[0] == "rt" and cef_entry[1] != nil then @cef_hash["bigip_time"] = cef_entry[1]
+          elsif cef_entry[0] == "rt" and cef_entry[1] != nil then @cef_hash["device_time"] = cef_entry[1]
 
             # Action
           elsif cef_entry[0] == "act" and cef_entry[1] != nil then @cef_hash["attack_mitigation_action"] = cef_entry[1]
@@ -677,7 +677,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           # Structure the dynamic CEF labels to fit the normalization objects
 
-          puts "test"
+          puts cef_dyn2_hash
 
           cef_dyn2_hash.each do |key,value|
 
@@ -707,13 +707,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           end
 
-          puts "test2"
-
         end
 
       end
-
-      puts @cef_hash
 
       if @cef_hash.has_key?("attack_detection_method") and @cef_hash["attack_detection_method"] == "TPS Increased"
 
