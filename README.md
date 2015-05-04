@@ -163,7 +163,9 @@ output {<br>
 }<br>
 </i>
 
-This will setup a udp_listener for port 6343 on IP 172.16.21.41. Change the IP to reflect an IP on your system that you want the listener to use.
+This will setup a udp_listener and a tcp_listener for port 1514 on IP 172.16.21.41. Change the IP to reflect an IP on your system that you want the listener to use.
+
+The default_health_string is what the BIG-IP sends during health check of the pool member used for hsl. We don't care about that packet and will drop it early in the parsing.
 
 The output used by the configuration is stdout with rubydebug codec. It's just for testing. Select a desired output plugin if different from above.
 
