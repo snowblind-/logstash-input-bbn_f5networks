@@ -64,12 +64,12 @@ Once you verified that <i>jruby, gem and jgem</i> runs without any errors you ne
 </i>
 
 ## Installing Logstash
-Then install >= logstash-1.5.0rc2. The plugin has been developed with this specific release of logstash.
+Then install >= logstash-1.5.0rc3. The plugin has been developed with this specific release of logstash.
 
-The above logstash release can be found at: http://download.elasticsearch.org/logstash/logstash/packages/debian/logstash_1.5.0.rc2-1_all.deb
+The above logstash release can be found at: http://download.elasticsearch.org/logstash/logstash/packages/debian/logstash_1.5.0.rc3-1_all.deb
 
 <i>
-  devops-github@devsrv10:~$ sudo dpkg -i <u>path-to-logstash_1.5.0.rc2-1_all.deb</u> <br>
+  devops-github@devsrv10:~$ sudo dpkg -i <u>path-to-logstash_1.5.0.rc3-1_all.deb</u> <br>
 </i>
 
 Logstash installs itself in /opt/logstash with binaries found in <i>/opt/logstash/bin/</i> and Gemfile found at <i>/opt/logstash/Gemfile</i>. This file is important and we will be covered later in the README file under "Configure Logstash Access to Plugin".
@@ -123,7 +123,7 @@ Test the dependencies by running the following command
 If you don't get any errors running the two commands above you are finshed with the plugin installation.
 
 ## Configure Logstash Access to Plugin
-The current version (RC2) of Logstash 1.5.0 has a problem with the plugin binary which stops you from installing the binary in the way it was intended to. We have been told that this will work in the GA release. Until then we have to run the plugin in the same way we do during developmemnt.
+The current version (RC3) of Logstash 1.5.0 has a problem with the plugin binary which stops you from installing the binary in the way it was intended to. We have been told that this will work in the GA release. Until then we have to run the plugin in the same way we do during developmemnt.
 
 Edit Logstash Gem file and add the following line to the file right after the gemspec line.
 
