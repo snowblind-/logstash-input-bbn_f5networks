@@ -709,7 +709,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       end
 
-      if @cef_hash.has_key?("detection_mode") and @cef_hash["detection_mode"] == "TPS Increased"
+      if @cef_hash.has_key?("attack_detection_method") and @cef_hash["attack_detection_method"] == "TPS Increased"
+
+        puts cef_dyn2_hash.to_s
 
         # HTTP Flood (by TPS)
 
