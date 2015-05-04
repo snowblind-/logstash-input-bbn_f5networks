@@ -507,6 +507,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           end
 
+          puts "test"
+
         elsif @cef_hash["device_module"] == "ASM"
 
           @cef_hash["attack_category"] = "Application DoS Event"
