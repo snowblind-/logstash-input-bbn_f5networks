@@ -647,6 +647,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           end
 
+          puts "test"
+
           if @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
 
             @cef_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
