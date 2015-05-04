@@ -719,23 +719,12 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         @cef_hash["attack_name"] = "HTTP Flood"
 
-        # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
 
-        @cef_hash.delete("attack")
-        @cef_hash.delete("detection_mode")
-
-      elsif @cef_hash.has_key?("detection_mode") and @cef_hash["detection_mode"] == "Latency Increased"
+      elsif @cef_hash.has_key?("attack_detection_method") and @cef_hash["attack_detection_method"] == "Latency Increased"
 
         # HTTP Latency Symptom
-        @cef_hash["mitigation_method"] = @cef_hash["attack"]
-        @cef_hash["detection_method"] = @cef_hash["detection_mode"]
 
         @cef_hash["attack_name"] = "HTTP Response Latency"
-
-        # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
-
-        @cef_hash.delete("attack")
-        @cef_hash.delete("detection_mode")
 
       end
 
