@@ -30,45 +30,47 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
   config_name "bbn_f5networks"
 
-	default :codec, "plain"
+  default :codec, "plain"
 
-	# IP address to bind to input plugin
-	config :log_collector_ip, :validate => :string, :default => "0.0.0.0"
-	# Port to bind to input plugin  
-	config :log_collector_port, :validate => :number, :default => 514
+  # IP address to bind to input plugin
+  config :log_collector_ip, :validate => :string, :default => "0.0.0.0"
+  # Port to bind to input plugin
+  config :log_collector_port, :validate => :number, :default => 514
   # Protocol to use UDP/TCP or both
   config :log_collector_protocol, :validate => :array, :default => [ "udp" ]
   # The default health string from BIG-IP
   config :default_health_string, :validate => :string, :default => "default send string"
-	# Timezone string should be "UTC" = +00.00
-	config :timezone, :validate => :string, :default => "UTC"
+  # Use local geoip filter or BIG-IP geoip data in log message
+  #config :local_geo_location, :validate => :boolean, :default => true
+  # Timezone string should be "UTC" = +00.00
+  config :timezone, :validate => :string, :default => "UTC"
   config :locale, :validate => :string
 
-	public
-  	def initialize(params)
+  public
+  def initialize(params)
 
-    	super
-    	
-    	@shutdown_requested = Concurrent::AtomicBoolean.new(false)
-    	BasicSocket.do_not_reverse_lookup = true
-  	
-  	end
+    super
 
-	public
-	def register
+    @shutdown_requested = Concurrent::AtomicBoolean.new(false)
+    BasicSocket.do_not_reverse_lookup = true
 
-		require "thread_safe"
+  end
+
+  public
+  def register
+
+    require "thread_safe"
 
     @grok_filter = LogStash::Filters::Grok.new(
         "overwrite" => "message",
-      	"match" => { "message" => "<%{POSINT:priority}>%{SYSLOGLINE}" },
-      	"tag_on_failure" => ["_grokparsefailure_sysloginput"],
+        "match" => { "message" => "<%{POSINT:priority}>%{SYSLOGLINE}" },
+        "tag_on_failure" => ["_grokparsefailure_sysloginput"],
     )
 
     @date_filter = LogStash::Filters::Date.new(
         "match" => [ "timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss", "ISO8601"],
-      	"locale" => @locale,
-      	"timezone" => @timezone,
+        "locale" => @locale,
+        "timezone" => @timezone,
     )
 
     @grok_filter.register
@@ -76,10 +78,10 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     @tcp_sockets = ThreadSafe::Array.new
     @tcp = @udp = nil
-	
-	end
 
-	def run(queue)
+  end
+
+  def run(queue)
 
     # TODO: We need to make sure we start UDP listener before the TCP listener if both are in the config variable, for
     # now we leave it without validation as we can control the order in the .conf file...
@@ -105,12 +107,12 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     end
 
   end
-  	
+
   private
   def server(protocol, queue)
 
     self.send("#{protocol}_listener", queue)
-  	
+
   rescue => e
     if @shutdown_requested.false?
       @logger.warn("listener died",
@@ -119,16 +121,16 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
                    :exception => e,
                    :backtrace => e.backtrace
       )
-      		
+
       sleep(5)
-      		
+
       retry
-    	
+
     end
-	
-	end
-	
-	private
+
+  end
+
+  private
   def udp_listener(queue)
 
     @logger.info("Starting f5network udp listener", :address => "#{@log_collector_ip}:#{@log_collector_port}")
@@ -145,11 +147,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   ensure
 
     close_udp
-  
-	end
-  
+
+  end
+
   private
-	def tcp_listener(queue)
+  def tcp_listener(queue)
 
     @logger.info("Starting f5network tcp listener", :address => "#{@log_collector_ip}:#{@log_collector_port}")
 
@@ -164,13 +166,13 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       Thread.new(queue, socket) do |queue, socket|
         tcp_receiver(queue, socket)
       end
-    
+
     end
-  	
+
   ensure
-    
+
     close_tcp
-  	
+
   end
 
   def tcp_receiver(queue, socket)
@@ -180,20 +182,20 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     LogStash::Util::set_thread_name("input|f5networks|tcp|#{ip}:#{port}}")
 
     socket.each { |line| decode(ip, queue, line) }
-  	
 
-	# Catch connection reset exceptions, we don't want them to be passed up to the tcp_listener
+
+      # Catch connection reset exceptions, we don't want them to be passed up to the tcp_listener
   rescue Errno::ECONNRESET
 
-    ensure
-      @tcp_sockets.delete(socket)
-      socket.close rescue nil
-  
-	end
-  
-	private
+  ensure
+    @tcp_sockets.delete(socket)
+    socket.close rescue nil
+
+  end
+
+  private
   def decode(host, queue, data)
-    
+
     @codec.decode(data) do |event|
 
       # In case BIG-IP is sending health status messages to the same port
@@ -213,16 +215,16 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     end
 
-  	# Catch decode related exceptions, not related to the socket
+      # Catch decode related exceptions, not related to the socket
   rescue => e
-    
+
     @logger.error("Error decoding data",
                   :data => line.inspect,
                   :exception => e,
                   :backtrace => e.backtrace)
-  
+
   end
-  
+
   public
   def teardown
 
@@ -230,31 +232,31 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     close_udp
     close_tcp
     finished
-  
+
   end
 
   private
   def close_udp
-    
+
     if @udp
       @udp.close_read rescue nil
       @udp.close_write rescue nil
     end
-    	
+
     @udp = nil
-    
+
   end
 
   private
   def close_tcp
-    
+
     @tcp_sockets.each do |socket|
       socket.close rescue nil
     end
-    
+
     @tcp.close if @tcp rescue nil
     @tcp = nil
-  
+
   end
 
   public
@@ -262,11 +264,15 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     @cef_hash = Hash.new
 
+    @cef_hash = {"device_vendor"=>"n/a", "device_module"=>"n/a", "device_version"=>"n/a", "device_hostname"=>"n/a", "device_ip"=>"n/a", "device_time"=>"n/a", "bigip_dos_policy"=>"n/a", "bigip_policy_apply_date"=>"n/a", "bigip_virtual_server"=>"n/a", "bigip_route_domain"=>"n/a", "bigip_partition"=>"n/a", "flow_table_id"=>"n/a", "traffic_stat_type"=>"n/a", "traffic_stat_count"=>"n/a", "cookie_challenge_issued"=>"n/a", "cookie_challenge_passed"=>"n/a", "cookie_flow_accepted"=>"n/a", "cookie_flow_rejected"=>"n/a", "attack_name"=>0, "attack_id"=>0, "attack_status"=>"n/a", "attack_detection_rate"=>"n/a", "attack_drop_rate"=>"n/a", "attack_detection_method"=>"n/a", "attack_mitigation_method"=>"n/a", "attack_mitigation_action"=>"n/a", "attack_geo_location_local"=>"n/a", "attack_geo_location_remote"=>"n/a", "attack_source_ip"=>"n/a", "attack_source_port"=>0, "attack_source_vlan"=>"n/a", "attack_destination_ip"=>"n/a", "attack_destination_port"=>0, "attack_destination_vlan"=>"n/a", "attack_request_resource"=>"n/a", "attack_severity"=>"n/a", "attack_category"=>"n/a", "attack_event_count"=>0, "attack_ongoing"=>0, "unknown_key_value_pairs"=>"n/a"}
+
     message = event["message"]
 
     if message[0..4] == "<134>"
 
       # Syslog format
+
+      @cef_hash["raw_log_format"] = "Syslog/Standard"
 
       cef_data = message
       cef_data.delete! '"'
@@ -275,41 +281,64 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         cef_entry = cef_record.split("=")
 
-        # Device Host Name, FQDN
-        if cef_entry[0] == "hostname" then @cef_hash["bigip_hostname"] = cef_entry[1]
+        ## GENERAL DEVICE INFO
 
-          # Device IP
-        elsif cef_entry[0] == "bigip_mgmt_ip" then @cef_hash["bigip_ip"] = cef_entry[1]
-
-          # Remote time
-        elsif cef_entry[0] == "date_time" then @cef_hash["bigip_time"] = cef_entry[1]
+        # Device vendor
+        if cef_entry[0] == "device_vendor" then @cef_hash["device_vendor"] = cef_entry[1]
 
           # Device module
-        elsif cef_entry[0] == "device_product" then @cef_hash["module"] = cef_entry[1]
-
-          # Device Vendor
-        elsif cef_entry[0] == "device_vendor" then @cef_hash["vendor"] = cef_entry[1]
+        elsif cef_entry[0] == "device_product" then @cef_hash["device_module"] = cef_entry[1]
 
           # Device Version
-        elsif cef_entry[0] == "device_version" then @cef_hash["version"] = cef_entry[1]
+        elsif cef_entry[0] == "device_version" then @cef_hash["device_version"] = cef_entry[1]
 
-          # Action
-        elsif cef_entry[0] == "action" then @cef_hash["mitigation_method"] = cef_entry[1]
+          # Device Hostname, FQDN
+        elsif cef_entry[0] == "hostname" then @cef_hash["device_hostname"] = cef_entry[1]
+
+          # Device IP
+        elsif cef_entry[0] == "bigip_mgmt_ip" then @cef_hash["device_ip"] = cef_entry[1]
+
+          # Remote time
+        elsif cef_entry[0] == "date_time" then @cef_hash["device_time"] = cef_entry[1]
+
+
+          ## F5 SPECIFIC INFO
 
           # BIG-IP Route Domain
-        elsif cef_entry[0] == "route_domain" then @cef_hash["route_domain"] = cef_entry[1]
+        elsif cef_entry[0] == "route_domain" then @cef_hash["bigip_route_domain"] = cef_entry[1]
 
-          # Destination VLAN
-        elsif cef_entry[0] == "vlan" then @cef_hash["destination_vlan"] = cef_entry[1]
+          # BIG-IP Partition
+        elsif cef_entry[0] == "partition_name" then @cef_hash["bigip_partition"] = cef_entry[1]
 
-          # Partition
-        elsif cef_entry[0] == "partition_name" then @cef_hash["partition"] = cef_entry[1]
+          # BIG-IP Virtual Server
+        elsif cef_entry[0] == "context_name" then @cef_hash["bigip_virtual_server"] = cef_entry[1]
 
-          # Context Name
-        elsif cef_entry[0] == "context_name" then @cef_hash["context_name"] = cef_entry[1]
 
-          # Belongs to TCP Flow ID
-        elsif cef_entry[0] == "flow_id" then @cef_hash["tcp_flow_id"] = cef_entry[1]
+          ## FLOW TABLE ID
+
+          # Flow Table ID for Session
+        elsif cef_entry[0] == "flow_id" then @cef_hash["flow_table_id"] = cef_entry[1]
+
+
+          ## ATTACK INFO
+
+          # Attack Name
+        elsif cef_entry[0] == "dos_attack_name" then @cef_hash["attack_name"] = cef_entry[1]
+
+          # Attack ID
+        elsif cef_entry[0] == "dos_attack_id" then @cef_hash["attack_id"] = cef_entry[1]
+
+          # Attack Status, Attack Started, Attack Sampled, Attack Stopped
+        elsif cef_entry[0] == "dos_attack_event" then @cef_hash["attack_status"] = cef_entry[1]
+
+          # Packet Received
+        elsif cef_entry[0] == "dos_packets_received" then @cef_hash["attack_detection_rate"] = cef_entry[1]
+
+          # Packet Dropped
+        elsif cef_entry[0] == "dos_packets_dropped" then @cef_hash["attack_drop_rate"] = cef_entry[1]
+
+          # Action
+        elsif cef_entry[0] == "action" then @cef_hash["attack_mitigation_action"] = cef_entry[1]
 
           # Source IP
         elsif cef_entry[0] == "source_ip" then @cef_hash["attack_source_ip"] = cef_entry[1]
@@ -323,36 +352,71 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           # Destination Port
         elsif cef_entry[0] == "dest_port" then @cef_hash["attack_destination_port"] = cef_entry[1]
 
-          # Attack Name
-        elsif cef_entry[0] == "dos_attack_name" then @cef_hash["attack_name"] = cef_entry[1]
-
-          # Attack ID
-        elsif cef_entry[0] == "dos_attack_id" then @cef_hash["attack_id"] = cef_entry[1]
-
-          # Attack Event, Attack Started, Attack Sampled, Attack Stopped
-        elsif cef_entry[0] == "dos_attack_event" then @cef_hash["attack_status"] = cef_entry[1]
-
-          # Attack Type
-        elsif cef_entry[0] == "errdefs_msg_name" then @cef_hash["attack_type"] = cef_entry[1]
-
-          # Attack Type ID, we don't collect this so do next
-        elsif cef_entry[0] == "errdefs_msgno" then next
+          # Destination VLAN
+        elsif cef_entry[0] == "vlan" then @cef_hash["attack_destination_vlan"] = cef_entry[1]
 
           # Attack Severity
         elsif cef_entry[0] == "severity" then @cef_hash["attack_severity"] = cef_entry[1]
 
-          # Packet Dropped
-        elsif cef_entry[0] == "dos_packets_dropped" then @cef_hash["packet_dropped"] = cef_entry[1]
+          # Attack Category e.g Network DoS Event
+        elsif cef_entry[0] == "errdefs_msg_name" then @cef_hash["attack_category"] = cef_entry[1]
 
-          # Packet Received
-        elsif cef_entry[0] == "dos_packets_received" then @cef_hash["packet_received"] = cef_entry[1]
+          # Traffic Stats entries
+        elsif cef_entry[0] == "traffic_stat_type" then @cef_hash["traffic_stat_type"] = cef_entry[1]
+
+        elsif cef_entry[0] == "traffic_stat_cnt" then @cef_hash["traffic_stat_count"] = cef_entry[1]
+
+        elsif cef_entry[0] == "cookie_challenge_issued" then @cef_hash["cookie_challenge_issued"] = cef_entry[1]
+
+        elsif cef_entry[0] == "cookie_challenge_passed" then @cef_hash["cookie_challenge_passed"] = cef_entry[1]
+
+        elsif cef_entry[0] == "cookie_flow_accepted" then @cef_hash["cookie_flow_accepted"] = cef_entry[1]
+
+        elsif cef_entry[0] == "cookie_flow_rejected" then @cef_hash["cookie_flow_rejected"] = cef_entry[1]
+
+          # Attack Type ID, we don't collect this so do next
+        elsif cef_entry[0] == "errdefs_msgno" then next
 
         else
 
-            # Unknown cef_entry log it so we know what we miss
-          @logger.info("Unexpected cef_entry", :unknown_cef_entry => "#{@cef_entry[0]}:#{@cef_entry[1]}")
+          # Unknown cef_entry, log it so we know what we miss
+          @logger.info("Unexpected field in event[message]", :unknown_cef_entry => "#{cef_entry[0]}:#{cef_entry[1]}")
 
         end
+
+      end
+
+      if @cef_hash["attack_category"] == "Traffic Statistics"
+
+        @cef_hash["attack_name"] = @cef_hash["attack_category"]
+
+        @cef_hash["attack_category"] = "Network DoS Event"
+
+      end
+
+      if @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+
+        @cef_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
+
+      elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+
+        @cef_hash["attack_mitigation_method"] = "Device-Wide Detection"
+
+      elsif @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] == "Flood attack"
+
+        @cef_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+      elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] == "Flood attack"
+
+        @cef_hash["attack_mitigation_method"] = "Source-IP Detection"
+
+      elsif @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] == "Sweep attack"
+
+        @cef_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+      elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] == "Sweep attack"
+
+        @cef_hash["attack_mitigation_method"] = "Source-IP Detection"
 
       end
 
@@ -360,14 +424,26 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       # CEF format
 
+      @cef_hash["raw_log_format"] = "Syslog/CEF"
+
       cef_dyn_hash = Hash.new
 
       spl_message = message.split("|")
 
-      @cef_hash["vendor"] = spl_message[1]
-      @cef_hash["module"] = spl_message[2]
-      @cef_hash["version"] = spl_message[3]
-      @cef_hash["attack"] = spl_message[5]
+      @cef_hash["device_vendor"] = spl_message[1]
+      @cef_hash["device_module"] = spl_message[2]
+      @cef_hash["device_version"] = spl_message[3]
+
+      if @cef_hash["device_module"] == "Advanced Firewall Module"
+
+        @cef_hash["attack_name"] = spl_message[5]
+
+      elsif @cef_hash["device_module"] == "ASM"
+
+        @cef_hash["attack_name"] = spl_message[4]
+        @cef_hash["attack_mitigation_method"] = spl_message[5]
+
+      end
 
       if spl_message.count == 8
         cef_data = spl_message[7]
@@ -379,20 +455,28 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         cef_entry = cef_record.split("=")
 
-        if @cef_hash["module"] == "Advanced Firewall Module"
+        if @cef_hash["device_module"] == "Advanced Firewall Module"
 
 
-            # Device Hostname, FQDN
-          if cef_entry[0] == "dvchost" then @cef_hash["bigip_hostname"] = cef_entry[1]
+          @cef_hash["attack_category"] = "Network DoS Event"
+
+          # Device Hostname, FQDN
+          if cef_entry[0] == "dvchost" then @cef_hash["device_hostname"] = cef_entry[1]
 
             # Device IP
-          elsif cef_entry[0] == "dvc" then @cef_hash["bigip_ip"] = cef_entry[1]
+          elsif cef_entry[0] == "dvc" then @cef_hash["device_ip"] = cef_entry[1]
 
             # Device time
-          elsif cef_entry[0] == "rt" then @cef_hash["bigip_time"] = cef_entry[1]
+          elsif cef_entry[0] == "rt" then @cef_hash["device_time"] = cef_entry[1]
+
+            # BIG-IP Route Domain
+          elsif cef_entry[0] == "F5RouteDomain" then @cef_hash["bigip_route_domain"] = cef_entry[1]
+
+            # Belongs to TCP Flow ID
+          elsif cef_entry[0] == "F5FlowID" then @cef_hash["flow_table_id"] = cef_entry[1]
 
             # Action
-          elsif cef_entry[0] == "act" then @cef_hash["mitigation_method"] = cef_entry[1]
+          elsif cef_entry[0] == "act" then @cef_hash["attack_mitigation_action"] = cef_entry[1]
 
             # Attack Source IP
           elsif cef_entry[0] == "src" then @cef_hash["attack_source_ip"] = cef_entry[1]
@@ -406,12 +490,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
             # Attack Destination Port
           elsif cef_entry[0] == "dpt" then @cef_hash["attack_destination_port"] = cef_entry[1]
 
-            # BIG-IP Route Domain
-          elsif cef_entry[0] == "F5RouteDomain" then @cef_hash["route_domain"] = cef_entry[1]
-
-            # Belongs to TCP Flow ID
-          elsif cef_entry[0] == "F5FlowID" then @cef_hash["tcp_flow_id"] = cef_entry[1]
-
           else
 
             # Dynamic CEF Entries
@@ -420,7 +498,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           end
 
-        elsif @cef_hash["module"] == "ASM"
+        elsif @cef_hash["device_module"] == "ASM"
+
+          @cef_hash["attack_category"] = "Application DoS Event"
 
           # Device Hostname, FQDN
           if cef_entry[0] == "dvchost" then @cef_hash["bigip_hostname"] = cef_entry[1]
@@ -432,10 +512,13 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           elsif cef_entry[0] == "rt" then @cef_hash["bigip_time"] = cef_entry[1]
 
             # Action
-          elsif cef_entry[0] == "act" then @cef_hash["mitigation_method"] = cef_entry[1]
+          elsif cef_entry[0] == "act" then @cef_hash["attack_mitigation_action"] = cef_entry[1]
 
             # Attack Source IP
           elsif cef_entry[0] == "src" and cef_entry[1] != nil then @cef_hash["attack_source_ip"] = cef_entry[1]
+
+            # Attack Source IP
+          elsif cef_entry[0] == "request" and cef_entry[1] != nil then @cef_hash["attack_request_resource"] = cef_entry[1]
 
           else
 
@@ -503,31 +586,117 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         end
 
-        if cef_dyn2_hash.has_key?("source_address") and cef_dyn2_hash["source_address"] == ""
+        if @cef_hash["device_module"] == "Advanced Firewall Module"
 
-          if @cef_hash.has_key?("attack_source_ip") and @cef_hash["attack_source_ip"] != ""
+          # Structure the dynamic CEF labels to fit the normalization objects
 
-            cef_dyn2_hash["source_address"] = @cef_hash["attack_source_ip"]
+          cef_dyn2_hash.each do |key,value|
 
-          else
+            if key == "dos_packets_received" then @cef_hash["attack_detection_rate"] = value
 
-            cef_dyn2_hash.delete("source_address")
+            elsif key == "dos_packets_dropped" then @cef_hash["attack_drop_rate"] = value
+
+            elsif key == "virtual_name" then @cef_hash["bigip_virtual_server"] = value
+
+            elsif key == "vlan" then @cef_hash["attack_destination_vlan"] = value
+
+            elsif key == "attack_id" then @cef_hash["attack_id"] = value
+
+            elsif key == "attack_status" then @cef_hash["attack_status"] = value
+
+            elsif key == "context_name" then @cef_hash["bigip_virtual_server"] = value
+
+            elsif key == "traffic_stat_type" then @cef_hash["attack_status"] = value
+
+            elsif key == "traffic_stat_type" then @cef_hash["traffic_stat_type"] = value
+
+            elsif key == "traffic_stat_cnt" then @cef_hash["traffic_stat_count"] = value
+
+            elsif key == "cookie_challenge_issued" then @cef_hash["cookie_challenge_issued"] = value
+
+            elsif key == "cookie_challenge_passed" then @cef_hash["cookie_challenge_passed"] = value
+
+            elsif key == "cookie_flow_accepted" then @cef_hash["cookie_flow_accepted"] = value
+
+            elsif key == "cookie_flow_rejected" then @cef_hash["cookie_flow_rejected"] = value
+
+            else
+
+              # Unknown key/value pairs or key's we don't care about normalizing
+
+            end
+
+          end
+
+          if @cef_hash["attack_name"] == "" and @cef_hash["attack_status"] == "TCP Syncookie"
+
+            @cef_hash["attack_name"] = "TCP SYN flood"
+
+            @cef_hash["attack_status"] = @cef_hash["attack_mitigation_action"]
+
+            @cef_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
+
+          end
+
+          if @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+
+            @cef_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
+
+          elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+
+            @cef_hash["attack_mitigation_method"] = "Device-Wide Detection"
+
+          elsif @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] == "Flood attack"
+
+            @cef_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+          elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] == "Flood attack"
+
+            @cef_hash["attack_mitigation_method"] = "Source-IP Detection"
+
+          elsif @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] == "Sweep attack"
+
+            @cef_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+          elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] == "Sweep attack"
+
+            @cef_hash["attack_mitigation_method"] = "Source-IP Detection"
+
+          end
+
+        elsif @cef_hash["device_module"] == "ASM"
+
+          # Structure the dynamic CEF labels to fit the normalization objects
+
+          cef_dyn_hash2.each do |key,value|
+
+            if key == "geo_location" then @cef_hash["attack_geo_location_remote"] = value
+
+            elsif key == "attack_status" then @cef_hash["attack_status"] = value
+
+            elsif key == "attack_id" then @cef_hash["attack_id"] = value
+
+            elsif key == "policy_apply_date" then @cef_hash["bigip_policy_apply_date"] = value
+
+            elsif key == "Virtual Server" then @cef_hash["bigip_virtual_server"] = value
+
+            elsif key == "policy_name" then @cef_hash["bigip_dos_policy"] = value
+
+            elsif key == "detection_mode" then @cef_hash["attack_detection_method"] = value
+
+            elsif key == "detection_average" then @cef_hash["attack_detection_rate"] = value
+
+            elsif key == "dropped_requests" then @cef_hash["attack_drop_rate"] = value
+
+            else
+
+              # Unknown key/value pairs or key's we don't care about normalizing
+
+            end
 
           end
 
         end
-
-        if cef_dyn2_hash.has_key?("destination_address") and cef_dyn2_hash["destination_address"] == ""
-
-          if @cef_hash.has_key?("attack_destination_ip") and @cef_hash["attack_destination_ip"] != ""
-
-            cef_dyn2_hash["destination_address"] = @cef_hash["attack_destination_ip"]
-
-          end
-
-        end
-
-        @cef_hash.merge!(cef_dyn2_hash)
 
       end
 
@@ -577,6 +746,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     return @cef_hash
 
-	end
-  
+  end
+
 end # class LogStash::Inputs::F5Networks
