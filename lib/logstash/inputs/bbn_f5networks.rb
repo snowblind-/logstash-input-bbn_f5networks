@@ -677,6 +677,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           # Structure the dynamic CEF labels to fit the normalization objects
 
+          puts "test"
+
           cef_dyn_hash2.each do |key,value|
 
             if key == "geo_location" and value != nil then @cef_hash["attack_geo_location_remote"] = value
@@ -708,9 +710,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
         end
 
       end
-
-      puts cef_dyn2_hash
-      puts @cef_hash
 
       if @cef_hash.has_key?("attack_detection_method") and @cef_hash["attack_detection_method"] == "TPS Increased"
 
