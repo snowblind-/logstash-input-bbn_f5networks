@@ -148,11 +148,11 @@ Add the follwoing configuration to the file
 
 <i>
 input {<br>
-        	bbn_f5networks {
-        		log_collector_ip => "172.16.21.41"
-        		log_collector_port => 1514
-        		log_collector_protocol => [ "udp", "tcp" ]
-        		default_health_string => "default send string"
+        	bbn_f5networks {<br>
+        		log_collector_ip => "172.16.21.41"<br>
+        		log_collector_port => 1514<br>
+        		log_collector_protocol => [ "udp", "tcp" ]<br>
+        		default_health_string => "default send string"<br>
         	}<br>
 }<br>
 <br>
