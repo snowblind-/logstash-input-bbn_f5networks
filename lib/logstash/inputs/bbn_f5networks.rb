@@ -264,7 +264,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     @cef_hash = Hash.new
 
-    @cef_hash = {"device_vendor"=>"n/a", "device_module"=>"n/a", "device_version"=>"n/a", "device_hostname"=>"n/a", "device_ip"=>"n/a", "device_time"=>"n/a", "bigip_dos_policy"=>"n/a", "bigip_policy_apply_date"=>"n/a", "bigip_virtual_server"=>"n/a", "bigip_route_domain"=>"n/a", "bigip_partition"=>"n/a", "flow_table_id"=>"n/a", "traffic_stat_type"=>"n/a", "traffic_stat_count"=>0, "cookie_challenge_issued"=>0, "cookie_challenge_passed"=>0, "cookie_flow_accepted"=>0, "cookie_flow_rejected"=>0, "attack_name"=>"n/a", "attack_id"=>0, "attack_status"=>"n/a", "attack_detection_rate"=>"n/a", "attack_drop_rate"=>"n/a", "attack_detection_method"=>"n/a", "attack_mitigation_method"=>"n/a", "attack_mitigation_action"=>"n/a", "attack_geo_location_local"=>"n/a", "attack_geo_location_remote"=>"n/a", "attack_source_ip"=>"n/a", "attack_source_port"=>0, "attack_source_vlan"=>"n/a", "attack_destination_ip"=>"n/a", "attack_destination_port"=>0, "attack_destination_vlan"=>"n/a", "attack_request_resource"=>"n/a", "attack_severity"=>0, "attack_category"=>"n/a", "attack_event_count"=>0, "attack_ongoing"=>0, "unknown_key_value_pairs"=>"n/a"}
+    @cef_hash = {"device_vendor"=>"n/a", "device_module"=>"n/a", "device_version"=>"n/a", "device_hostname"=>"n/a", "device_ip"=>"n/a", "device_time"=>"n/a", "bigip_dos_policy"=>"n/a", "bigip_policy_apply_date"=>"n/a", "bigip_virtual_server"=>"n/a", "bigip_route_domain"=>"n/a", "bigip_partition"=>"n/a", "flow_table_id"=>"n/a", "traffic_stat_type"=>"n/a", "traffic_stat_count"=>0, "cookie_challenge_issued"=>0, "cookie_challenge_passed"=>0, "cookie_flow_accepted"=>0, "cookie_flow_rejected"=>0, "attack_name"=>"n/a", "attack_id"=>0, "attack_status"=>"n/a", "attack_detection_rate"=>"n/a", "attack_drop_rate"=>"n/a", "attack_detection_method"=>"n/a", "attack_mitigation_method"=>"n/a", "attack_mitigation_action"=>"n/a", "attack_geo_location_local"=>"n/a", "attack_geo_location_remote"=>"n/a", "attack_source_ip"=>"n/a", "attack_source_port"=>0, "attack_source_vlan"=>"n/a", "attack_destination_ip"=>"n/a", "attack_destination_port"=>0, "attack_destination_vlan"=>"n/a", "attack_request_resource"=>"n/a", "attack_severity"=>0, "attack_category"=>"n/a", "attack_event_count"=>0, "attack_ongoing"=>0, "unknown_key_value_pairs"=>"n/a", "attack_dns_query_name"=>"n/a", "attack_dns_query_type"=>"n/a"}
 
     message = event["message"]
 
@@ -277,7 +277,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       cef_data = message
       cef_data.delete! '"'
 
-      cef_data.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |cef_record|
+      cef_data.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |cef_record|
 
         cef_entry = cef_record.split("=")
 
@@ -317,7 +317,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           # Flow Table ID for Session
         elsif cef_entry[0] == "flow_id" and cef_entry[1] != nil then @cef_hash["flow_table_id"] = cef_entry[1]
-
 
           ## ATTACK INFO
 
@@ -360,6 +359,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
           # Attack Category e.g Network DoS Event
         elsif cef_entry[0] == "errdefs_msg_name" and cef_entry[1] != nil then @cef_hash["attack_category"] = cef_entry[1]
 
+          # DNS DDoS Events used in DoS DNS Profile
+        elsif cef_entry[0] == "dns_query_name" and cef_entry[1] != nil then @cef_hash["attack_dns_query_name"] = cef_entry[1]
+        elsif cef_entry[0] == "dns_query_type" and cef_entry[1] != nil then @cef_hash["attack_dns_query_type"] = cef_entry[1]
+
+
           # Traffic Stats entries
         elsif cef_entry[0] == "traffic_stat_type" and cef_entry[1] != nil then @cef_hash["traffic_stat_type"] = cef_entry[1]
 
@@ -385,6 +389,17 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       end
 
+
+      if @cef_hash["attack_category"] == "DNS Event" and @cef_hash["attack_dns_query_type"] != "n/a"
+
+        if @cef_hash["bigip_virtual_server"] != "n/a"
+
+          @cef_hash["attack_mitigation_method"] = "Virtual Server Wide Rate Limiting"
+
+        end
+
+      end
+
       if @cef_hash["attack_name"] == "n/a" and @cef_hash["attack_status"] == "TCP Syncookie"
 
         @cef_hash["attack_name"] = "TCP SYN flood"
@@ -403,11 +418,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       end
 
-      if @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+      if @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_category"] != "DNS Event" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
 
         @cef_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
 
-      elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+      elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_category"] != "DNS Event" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
 
         @cef_hash["attack_mitigation_method"] = "Device-Wide Detection"
 
@@ -629,9 +644,35 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
             elsif key == "cookie_flow_rejected" and value != nil then @cef_hash["cookie_flow_rejected"] = value
 
+            elsif key == "query_name" and value != nil then @cef_hash["attack_dns_query_name"] = value
+
+            elsif key == "query_type" and value != nil then @cef_hash["attack_dns_query_type"] = value
+
+            elsif key == "dos_attack_name" and value != nil then @cef_hash["tmp_attack_name"] = value
+
             else
 
               # Unknown key/value pairs or key's we don't care about normalizing
+
+            end
+
+          end
+
+          if @cef_hash["attack_name"] == "DNS Event" and @cef_hash["attack_dns_query_type"] != "n/a"
+
+            @cef_hash["attack_category"] = @cef_hash["attack_name"]
+
+            if @cef_hash.has_key?("tmp_attack_name")
+
+              @cef_hash["attack_name"] = @cef_hash["tmp_attack_name"]
+
+              @cef_hash.delete("tmp_attack_name")
+
+            end
+
+            if @cef_hash["bigip_virtual_server"] != "n/a"
+
+              @cef_hash["attack_mitigation_method"] = "Virtual Server Wide Rate Limiting"
 
             end
 
@@ -647,13 +688,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           end
 
-          puts "test"
-
-          if @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+          if @cef_hash["attack_mitigation_action"] == "Drop" and @cef_hash["attack_category"] != "DNS Event" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
 
             @cef_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
 
-          elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
+          elsif @cef_hash["attack_mitigation_action"] == "Allow" and @cef_hash["attack_category"] != "DNS Event" and @cef_hash["attack_name"] != "Flood attack" and @cef_hash["attack_name"] != "Sweep attack"
 
             @cef_hash["attack_mitigation_method"] = "Device-Wide Detection"
 
