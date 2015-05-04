@@ -717,9 +717,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         # HTTP Flood (by TPS)
 
-        @cef_hash["mitigation_method"] = @cef_hash["attack"]
-        @cef_hash["detection_method"] = @cef_hash["detection_mode"]
-
         @cef_hash["attack_name"] = "HTTP Flood"
 
         # Clean up the hash entries in cef_dyn2_hash has so they don't get merged into cef_hash
