@@ -311,8 +311,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
         elsif cef_entry[0] == "partition_name" then @cef_hash["bigip_partition"] = cef_entry[1]
 
           # BIG-IP Virtual Server
-        elsif cef_entry[0] == "context_name" then @cef_hash["bigip_virtual_server"] = cef_entry[1]
-
+        elsif cef_entry[0] == "context_name" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = cef_entry[1]
 
           ## FLOW TABLE ID
 
