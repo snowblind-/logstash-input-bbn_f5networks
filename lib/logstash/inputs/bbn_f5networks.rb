@@ -507,8 +507,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           end
 
-          puts "test"
-
         elsif @cef_hash["device_module"] == "ASM"
 
           @cef_hash["attack_category"] = "Application DoS Event"
@@ -603,33 +601,33 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           cef_dyn2_hash.each do |key,value|
 
-            if key == "dos_packets_received" and cef_entry[1] != nil then @cef_hash["attack_detection_rate"] = value
+            if key == "dos_packets_received" and value != nil then @cef_hash["attack_detection_rate"] = value
 
-            elsif key == "dos_packets_dropped" and cef_entry[1] != nil then @cef_hash["attack_drop_rate"] = value
+            elsif key == "dos_packets_dropped" and value != nil then @cef_hash["attack_drop_rate"] = value
 
-            elsif key == "virtual_name" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = value
+            elsif key == "virtual_name" and value != nil then @cef_hash["bigip_virtual_server"] = value
 
-            elsif key == "vlan" and cef_entry[1] != nil then @cef_hash["attack_destination_vlan"] = value
+            elsif key == "vlan" and value != nil then @cef_hash["attack_destination_vlan"] = value
 
-            elsif key == "attack_id" and cef_entry[1] != nil then @cef_hash["attack_id"] = value
+            elsif key == "attack_id" and value != nil then @cef_hash["attack_id"] = value
 
-            elsif key == "attack_status" and cef_entry[1] != nil then @cef_hash["attack_status"] = value
+            elsif key == "attack_status" and value != nil then @cef_hash["attack_status"] = value
 
-            elsif key == "context_name" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = value
+            elsif key == "context_name" and value != nil then @cef_hash["bigip_virtual_server"] = value
 
-            elsif key == "traffic_stat_type" and cef_entry[1] != nil then @cef_hash["attack_status"] = value
+            elsif key == "traffic_stat_type" and value != nil then @cef_hash["attack_status"] = value
 
-            elsif key == "traffic_stat_type" and cef_entry[1] != nil then @cef_hash["traffic_stat_type"] = value
+            elsif key == "traffic_stat_type" and value != nil then @cef_hash["traffic_stat_type"] = value
 
-            elsif key == "traffic_stat_cnt" and cef_entry[1] != nil then @cef_hash["traffic_stat_count"] = value
+            elsif key == "traffic_stat_cnt" and value != nil then @cef_hash["traffic_stat_count"] = value
 
-            elsif key == "cookie_challenge_issued" and cef_entry[1] != nil then @cef_hash["cookie_challenge_issued"] = value
+            elsif key == "cookie_challenge_issued" and value != nil then @cef_hash["cookie_challenge_issued"] = value
 
-            elsif key == "cookie_challenge_passed" and cef_entry[1] != nil then @cef_hash["cookie_challenge_passed"] = value
+            elsif key == "cookie_challenge_passed" and value != nil then @cef_hash["cookie_challenge_passed"] = value
 
-            elsif key == "cookie_flow_accepted" and cef_entry[1] != nil then @cef_hash["cookie_flow_accepted"] = value
+            elsif key == "cookie_flow_accepted" and value != nil then @cef_hash["cookie_flow_accepted"] = value
 
-            elsif key == "cookie_flow_rejected" and cef_entry[1] != nil then @cef_hash["cookie_flow_rejected"] = value
+            elsif key == "cookie_flow_rejected" and value != nil then @cef_hash["cookie_flow_rejected"] = value
 
             else
 
@@ -681,23 +679,23 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
           cef_dyn_hash2.each do |key,value|
 
-            if key == "geo_location" and cef_entry[1] != nil then @cef_hash["attack_geo_location_remote"] = value
+            if key == "geo_location" and value != nil then @cef_hash["attack_geo_location_remote"] = value
 
-            elsif key == "attack_status" and cef_entry[1] != nil then @cef_hash["attack_status"] = value
+            elsif key == "attack_status" and value != nil then @cef_hash["attack_status"] = value
 
-            elsif key == "attack_id" and cef_entry[1] != nil then @cef_hash["attack_id"] = value
+            elsif key == "attack_id" and value != nil then @cef_hash["attack_id"] = value
 
-            elsif key == "policy_apply_date" and cef_entry[1] != nil then @cef_hash["bigip_policy_apply_date"] = value
+            elsif key == "policy_apply_date" and value != nil then @cef_hash["bigip_policy_apply_date"] = value
 
-            elsif key == "Virtual Server" and cef_entry[1] != nil then @cef_hash["bigip_virtual_server"] = value
+            elsif key == "Virtual Server" and value != nil then @cef_hash["bigip_virtual_server"] = value
 
-            elsif key == "policy_name" and cef_entry[1] != nil then @cef_hash["bigip_dos_policy"] = value
+            elsif key == "policy_name" and value != nil then @cef_hash["bigip_dos_policy"] = value
 
-            elsif key == "detection_mode" and cef_entry[1] != nil then @cef_hash["attack_detection_method"] = value
+            elsif key == "detection_mode" and value != nil then @cef_hash["attack_detection_method"] = value
 
-            elsif key == "detection_average" and cef_entry[1] != nil then @cef_hash["attack_detection_rate"] = value
+            elsif key == "detection_average" and value != nil then @cef_hash["attack_detection_rate"] = value
 
-            elsif key == "dropped_requests" and cef_entry[1] != nil then @cef_hash["attack_drop_rate"] = value
+            elsif key == "dropped_requests" and value != nil then @cef_hash["attack_drop_rate"] = value
 
             else
 
