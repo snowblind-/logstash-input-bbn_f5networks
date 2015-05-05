@@ -408,6 +408,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
         @cef_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
 
+        @cef_hash["attack_mitigation_method"] = "Virtual Server SYN Cookie"
+
       end
 
       if @cef_hash["attack_category"] == "Traffic Statistics"
@@ -685,6 +687,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
             @cef_hash["attack_status"] = @cef_hash["attack_mitigation_action"]
 
             @cef_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
+
+            @cef_hash["attack_mitigation_method"] = "Virtual Server SYN Cookie"
 
           end
 
