@@ -22,7 +22,7 @@ class BBNSyslog
 
     message = event["message"]
     message.delete! '"'
-    message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
+    #message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
 
     record = message.scan(/dos_attack_event=+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/)
     entry = record.to_s.split("=")
