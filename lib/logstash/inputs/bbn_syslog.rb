@@ -20,30 +20,9 @@ class BBNSyslog
     response = Hash.new(0)
     client = Elasticsearch::Client.new
 
-    #message = event["message"]
-    #message.delete! '"'
-    #message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
-
-    # Attack Started
-    #message = "<134>1 2015-01-15T01:02:02+01:00 bigip_1.bbn.lab tmm 14643 23003138 [F5@12276 action=None hostname=bigip.bbn.lab bigip_mgmt_ip=192.168.23.209 context_name= date_time=Jan 15 2015 01:02:02 dest_ip=10.10.20.11 dest_port=80 device_product=Advanced Firewall Module device_vendor=F5 device_version= dos_attack_event=Attack Started dos_attack_id=1586115644 dos_attack_name=TCP SYN flood dos_packets_dropped=0 dos_packets_received=0 errdefs_msgno=23003138 errdefs_msg_name=Network DoS Event flow_id=0000000000000000 severity=4 partition_name=Common route_domain=0 source_ip=10.10.20.10 source_port=15576 vlan=] Jan 15 2015 01:02:02,192.168.23.209,bigip.bbn.lab,,10.10.20.10,10.10.20.11,15576,80,0,,TCP SYN flood,1586115644,Attack Started,None,0,0,0000000000000000"
-
-    # Attack Sampled
-    #message = "<134>1 2015-01-15T01:02:02+01:00 bigip.bbn.lab tmm 14643 23003138 [F5@12276 action=Drop hostname=bigip.bbn.lab bigip_mgmt_ip=192.168.23.209 context_name= date_time=Jan 15 2015 01:02:04 dest_ip=10.10.20.11 dest_port=80 device_product=Advanced Firewall Module device_vendor=F5 device_version= dos_attack_event=Attack Sampled dos_attack_id=1586115644 dos_attack_name=TCP SYN flood dos_packets_dropped=6800 dos_packets_received=6810 errdefs_msgno=23003138 errdefs_msg_name=Network DoS Event flow_id=0000000000000000 severity=4 partition_name=Common route_domain=0 source_ip=10.10.20.10 source_port=15578 vlan=/Common/EXT_VLAN] Jan 15 2015 01:02:02,192.168.23.209,bigip.bbn.lab,,10.10.20.10,10.10.20.11,15578,80,0,/Common/EXT_VLAN,TCP SYN flood,1586115644,Attack Sampled,Drop,6810,6800,0000000000000000"
-
-    # Attack Sampled
-    #message = "<134>1 2015-01-15T01:02:02+01:00 bigip.bbn.lab tmm 14643 23003138 [F5@12276 action=Drop hostname=bigip.bbn.lab bigip_mgmt_ip=192.168.23.209 context_name= date_time=Jan 15 2015 01:02:06 dest_ip=10.10.20.11 dest_port=80 device_product=Advanced Firewall Module device_vendor=F5 device_version= dos_attack_event=Attack Sampled dos_attack_id=1586115644 dos_attack_name=TCP SYN flood dos_packets_dropped=6800 dos_packets_received=6810 errdefs_msgno=23003138 errdefs_msg_name=Network DoS Event flow_id=0000000000000000 severity=4 partition_name=Common route_domain=0 source_ip=10.10.20.10 source_port=15578 vlan=/Common/EXT_VLAN] Jan 15 2015 01:02:02,192.168.23.209,bigip.bbn.lab,,10.10.20.10,10.10.20.11,15578,80,0,/Common/EXT_VLAN,TCP SYN flood,1586115644,Attack Sampled,Drop,6810,6800,0000000000000000"
-
-
-    # Attack Ended
-    #message = "<134>1 2015-05-21T18:32:51+02:00 bigip.f5ddos.lan tmm 14886 23003138 [F5@12276 action=None hostname=bigip.bbn.lab bigip_mgmt_ip=192.168.23.209 context_name= date_time=Jan 15 2015 01:02:08 dest_ip=10.10.20.11 dest_port=80 device_product=Advanced Firewall Module device_vendor=F5 device_version=11.6.0.4.0.420 dos_attack_event=Attack Stopped dos_attack_id=1586115644 dos_attack_name=TCP SYN flood dos_packets_dropped=0 dos_packets_received=0 errdefs_msgno=23003138 errdefs_msg_name=Network DoS Event flow_id=0000000000000000 severity=4 partition_name=Common route_domain=0 source_ip=10.10.20.10 source_port=15580 vlan=] May 21 2015 18:32:50,192.168.23.40,bigip.f5ddos.lan,,172.16.20.41,172.16.20.40,8,37190,0,,TCP SYN flood,1134791032,Attack Stopped,None,0,0,0000000000000000"
-
-    # SYN Cookie
-    #message = "<134>1 2015-05-21T17:08:53+02:00 bigip.f5ddos.lan tmm 14886 23003138 [F5@12276 action=Threshold Exceeded hostname=bigip.f5ddos.lan bigip_mgmt_ip=192.168.23.40 context_name=/Common/www.f5ddos.pub-HTTP date_time=May 21 2015 17:08:52 dest_ip=10.10.20.46 dest_port=80 device_product=Advanced Firewall Module device_vendor=F5 device_version=11.6.0.4.0.420 dos_attack_event=TCP Syncookie dos_attack_id=0 dos_attack_name= dos_packets_dropped=0 dos_packets_received=0 errdefs_msgno=23003138 errdefs_msg_name=Network DoS Event flow_id=0000000000000000 severity=0 partition_name=Common route_domain=704 source_ip= source_port= vlan=] May 21 2015 17:08:52,192.168.23.40,bigip.f5ddos.lan,/Common/www.f5ddos.pub-HTTP,,10.10.20.46,,80,704,,,0,TCP Syncookie,Threshold Exceeded,0,0,0000000000000000"
-
-    # Traffic Statistics
-    #message = "<134>1 2015-05-19T12:57:39+02:00 bigip.f5ddos.lan tmm 14618 23003155 [F5@12276 hostname=bigip.f5ddos.lan bigip_mgmt_ip=192.168.23.40 context_name=/Common/www.f5ddos.pub-HTTP context_type=Virtual Server date_time=May 19 2015 12:57:39 device_product=Advanced Firewall Module device_vendor=F5 device_version=11.6.0.4.0.420 errdefs_msgno=23003155 errdefs_msg_name=Traffic Statistics severity=8 partition_name= traffic_stat_type=Active Flow traffic_stat_cnt=17] 192.168.23.40,bigip.f5ddos.lan,Virtual Server,/Common/www.f5ddos.pub-HTTP,Active Flow,17,"
-    #message = "<134>1 2015-05-19T12:57:39+02:00 bigip.f5ddos.lan tmm 14618 23003156 [F5@12276 hostname=bigip.f5ddos.lan bigip_mgmt_ip=192.168.23.40 context_name=/Common/www.f5ddos.pub-HTTP context_type=Virtual Server date_time=May 19 2015 12:57:39 device_product=Advanced Firewall Module device_vendor=F5 device_version=11.6.0.4.0.420 errdefs_msgno=23003156 errdefs_msg_name=Traffic Statistics severity=8 partition_name= traffic_stat_type=Cryptographic SYN Cookie cookie_challenge_issued=1341050560 cookie_challenge_passed=0 cookie_flow_accepted=0 cookie_flow_rejected=0] 192.168.23.40,bigip.f5ddos.lan,Virtual Server,/Common/www.f5ddos.pub-HTTP,Cryptographic SYN Cookie,1341050560,0,0,0,"
-
+    message = event["message"]
+    message.delete! '"'
+    message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
 
     record = message.scan(/dos_attack_event=+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/)
     entry = record.to_s.split("=")
