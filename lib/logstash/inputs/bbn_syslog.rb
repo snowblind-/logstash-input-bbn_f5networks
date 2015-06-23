@@ -58,7 +58,8 @@ class BBNSyslog
             "attack_destination_ip" => "",
             "attack_destination_port" => "",
             "attack_destination_vlan" => "",
-            "device_time" => ""
+            "device_time" => "",
+            "record_type" => "mitigation_stats"
 
         }
 
@@ -252,7 +253,7 @@ class BBNSyslog
               begin
 
                 client.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
-                              body: { doc: { attack_sample_counter: sample_counter, attack_source_ip: src_ip,
+                              body: { doc: { attack_event_counter: sample_counter, attack_source_ip: src_ip,
                               attack_source_port: src_port, attack_destination_ip: dst_ip, attack_destination_port: dst_port,
                               attack_mitigation_method: attack_mitigation_method} }
 
@@ -266,6 +267,7 @@ class BBNSyslog
                 mitigation_hash["attack_id"] = sample_hash["attack_id"]
                 mitigation_hash["attack_mitigation_method"] = sample_hash["attack_mitigation_method"]
                 mitigation_hash["device_time"] = sample_hash["device_time"]
+                mitigation_hash["record_type"] = "mitigations"
 
                 @response["mitigation_hash"] = mitigation_hash
 
@@ -352,7 +354,6 @@ class BBNSyslog
                     "device_time" => "",
                     "device_utc_offset" => "",
                     "bigip_dos_policy" => "",
-                    "bigip_policy_apply_date" => "",
                     "bigip_virtual_server" => "",
                     "bigip_route_domain" => "",
                     "bigip_partition" => "",
@@ -363,15 +364,15 @@ class BBNSyslog
                     "attack_status" => "Attack Started",
                     "attack_severity" => 0,
                     "attack_category" => "",
-                    "attack_event_count" => 1,
+                    "attack_event_counter" => 1,
                     "attack_ongoing" => 1,
                     "attack_source_ip" => "",
                     "attack_source_port" => "",
                     "attack_destination_ip" => "",
                     "attack_destination_port" => "",
                     "attack_start_date" => "",
-                    "attack_end_date" => "",
-                    "unknown_key_value_pair" => ""
+                    "unknown_key_value_pair" => "",
+                    "record_type" => "attacks"
                 }
 
                 record = nil
@@ -488,7 +489,7 @@ class BBNSyslog
             "attack_status" => "",
             "attack_severity" => 0,
             "attack_category" => "",
-            "attack_event_count" => 0,
+            "attack_event_counter" => 0,
             "attack_ongoing" => 1,
             "attack_start_date" => "",
             "unknown_key_value_pair" => "",
@@ -638,7 +639,6 @@ class BBNSyslog
             "device_time" => "",
             "device_utc_offset" => "",
             "bigip_dos_policy" => "",
-            "bigip_policy_apply_date" => "",
             "bigip_virtual_server" => "",
             "bigip_route_domain" => "",
             "bigip_partition" => "",
@@ -648,10 +648,9 @@ class BBNSyslog
             "attack_status" => "",
             "attack_severity" => 0,
             "attack_category" => "",
-            "attack_event_count" => 0,
+            "attack_event_counter" => 0,
             "attack_ongoing" => 0,
             "attack_start_date" => "",
-            "attack_end_date" => "",
             "unknown_key_value_pair" => ""
         }
 

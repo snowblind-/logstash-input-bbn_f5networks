@@ -234,14 +234,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     response.each do |key, value|
 
-      if key == "sample_hash"
-        value["record_type"] = "mitigation_stats"
-      elsif key == "start_hash"
-        value["record_type"] = "attacks"
-      elsif key == "mitigation_hash"
-        value["record_type"] = "mitigations"
-      end
-
       output = LogStash::Event.new(value)
       decorate(output)
 
