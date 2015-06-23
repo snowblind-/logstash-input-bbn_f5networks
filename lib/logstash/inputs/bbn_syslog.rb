@@ -176,8 +176,8 @@ class BBNSyslog
 
             if mash.hits.total == 1
 
-              sample_counter = mash.hits.hits.first._source.attack_sample_counter
-              sample_counter += 1
+              event_counter = mash.hits.hits.first._source.attack_event_counter
+              event_counter += 1
 
               src_ip = mash.hits.hits.first._source.attack_source_ip
               src_port = mash.hits.hits.first._source.attack_source_port
@@ -253,7 +253,7 @@ class BBNSyslog
               begin
 
                 client.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
-                              body: { doc: { attack_event_counter: sample_counter, attack_source_ip: src_ip,
+                              body: { doc: { attack_event_counter: event_counter, attack_source_ip: src_ip,
                               attack_source_port: src_port, attack_destination_ip: dst_ip, attack_destination_port: dst_port,
                               attack_mitigation_method: attack_mitigation_method} }
 
@@ -261,7 +261,7 @@ class BBNSyslog
 
               end
 
-              if sample_counter == 1
+              if event_counter == 1
 
                 mitigation_hash = Hash.new()
                 mitigation_hash["attack_id"] = sample_hash["attack_id"]
@@ -271,7 +271,7 @@ class BBNSyslog
 
                 @response["mitigation_hash"] = mitigation_hash
 
-              elsif sample_counter > 1
+              elsif event_counter > 1
 
                 # We need to verify that the mitigation_method has not changed, else create a new mitigation record
                 # with the changed mitigation method, we do this based on device_time and latest known method
@@ -308,7 +308,7 @@ class BBNSyslog
 
                       else
 
-                        BBNCommon.logger("INFO", "attack_sampled", "sample_counter reported > 1 but did fine =< 1 when searching ES for attack_id: #{sample_hash["attack_id"]}")
+                        BBNCommon.logger("INFO", "attack_sampled", "event_counter reported > 1 but did fine =< 1 when searching ES for attack_id: #{sample_hash["attack_id"]}")
 
                       end
 
