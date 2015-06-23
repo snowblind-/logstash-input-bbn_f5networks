@@ -104,6 +104,12 @@ class BBNSyslog
 
         end
 
+        if sample_hash["device_time"] != ""
+
+          sample_hash["device_time"] = BBNCommon.to_utc(sample_hash["device_time"], event["utc_offset"])
+
+        end
+
         if sample_hash["attack_category"] == "DNS Event" and sample_hash["attack_dns_query_type"] != ""
 
           if sample_hash["bigip_virtual_server"] != ""
@@ -352,7 +358,7 @@ class BBNSyslog
                     "device_hostname" => "",
                     "device_ip" => "",
                     "device_time" => "",
-                    "device_utc_offset" => "",
+                    "device_utc_offset" => event["utc_offset"],
                     "bigip_dos_policy" => "",
                     "bigip_virtual_server" => "",
                     "bigip_route_domain" => "",
@@ -410,9 +416,15 @@ class BBNSyslog
 
                   elsif entry[0] == "errdefs_msg_name" and entry[1] != nil then start_hash["attack_category"] = entry[1]
 
-                  elsif entry[0] == "date_time" and entry[1] != nil then start_hash["attack_started"] = entry[1]
+                  #elsif entry[0] == "date_time" and entry[1] != nil then start_hash["attack_started"] = entry[1]
 
                   end
+
+                end
+
+                if start_hash["device_time"] != ""
+
+                  start_hash["device_time"] = BBNCommon.to_utc(start_hash["device_time"], event["utc_offset"])
 
                 end
 
@@ -477,7 +489,7 @@ class BBNSyslog
             "device_hostname" => "",
             "device_ip" => "",
             "device_time" => "",
-            "device_utc_offset" => "",
+            "device_utc_offset" => event["utc_offset"],
             "bigip_dos_policy" => "",
             "bigip_virtual_server" => "",
             "bigip_route_domain" => "",
@@ -534,9 +546,15 @@ class BBNSyslog
 
           elsif entry[0] == "errdefs_msg_name" and entry[1] != nil then start_hash["attack_category"] = entry[1]
 
-          elsif entry[0] == "date_time" and entry[1] != nil then start_hash["attack_started"] = entry[1]
+          #elsif entry[0] == "date_time" and entry[1] != nil then start_hash["attack_started"] = entry[1]
 
           end
+
+        end
+
+        if start_hash["device_time"] != ""
+
+          start_hash["device_time"] = BBNCommon.to_utc(start_hash["device_time"], event["utc_offset"])
 
         end
 
@@ -566,6 +584,12 @@ class BBNSyslog
           elsif entry[0] == "dos_attack_id" and entry[1] != nil then stopped_hash["attack_id"] = entry[1]
 
           end
+
+        end
+
+        if stopped_hash["device_time"] != ""
+
+          stopped_hash["device_time"] = BBNCommon.to_utc(stopped_hash["device_time"], event["utc_offset"])
 
         end
 

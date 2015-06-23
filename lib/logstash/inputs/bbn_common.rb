@@ -54,7 +54,7 @@ class BBNCommon
 
     ndt = DateTime.new(tdt.year,tdt.month,tdt.day,tdt.hour,tdt.min,tdt.sec,offset)
 
-    return ndt
+    return ndt.new_offset(0)
 
   end
 
