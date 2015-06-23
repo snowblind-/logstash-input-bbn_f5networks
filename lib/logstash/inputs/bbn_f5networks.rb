@@ -54,10 +54,10 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   config :mlp_support, :validate => :number, :default => 0
 
   # Default UTC Offset
-  config :default_utc_offset, :validate => :string, :default => "UTC+0"
+  config :default_utc_offset, :validate => :string, :default => "0"
 
   # Explicit UTC offset per IP
-  config :explicit_utc_offset, :validate => :hash, :default => ["any", "UTC+0"]
+  config :explicit_utc_offset, :validate => :hash, :default => ["any", "0"]
 
   # Default health string sent from BIG-IP
   config :default_health_string, :validate => :string, :default => "default send string"
