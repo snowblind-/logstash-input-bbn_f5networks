@@ -15,14 +15,13 @@
 
 class BBNSyslog
 
-  def parse_syslog(event)
+  def self.parse_syslog(event)
 
-    response = Hash.new(0)
+    @response = Hash.new()
     client = Elasticsearch::Client.new
 
     message = event["message"]
     message.delete! '"'
-    #message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
 
     record = message.scan(/dos_attack_event=+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/)
     entry = record.to_s.split("=")
@@ -66,7 +65,6 @@ class BBNSyslog
         record = nil
         entry = nil
 
-        # Loop through the syslog message to get the rest
         message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
 
           entry = record.split("=")
@@ -241,11 +239,22 @@ class BBNSyslog
 
               end
 
+              if sample_hash.has_key?("attack_mitigation_method")
+
+                attack_mitigation_method = sample_hash["attack_mitigation_method"]
+
+              else
+
+                attack_mitigation_method = "Unknown"
+
+              end
+
               begin
 
                 client.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
                               body: { doc: { attack_sample_counter: sample_counter, attack_source_ip: src_ip,
-                              attack_source_port: src_port, attack_destination_ip: dst_ip, attack_destination_port: dst_port} }
+                              attack_source_port: src_port, attack_destination_ip: dst_ip, attack_destination_port: dst_port,
+                              attack_mitigation_method: attack_mitigation_method} }
 
                 #rescue => e
 
@@ -258,7 +267,7 @@ class BBNSyslog
                 mitigation_hash["attack_mitigation_method"] = sample_hash["attack_mitigation_method"]
                 mitigation_hash["device_time"] = sample_hash["device_time"]
 
-                response["mitigation_hash"] = mitigation_hash
+                @response["mitigation_hash"] = mitigation_hash
 
               elsif sample_counter > 1
 
@@ -291,13 +300,13 @@ class BBNSyslog
                           mitigation_hash["attack_mitigation_method"] = sample_hash["attack_mitigation_method"]
                           mitigation_hash["device_time"] = sample_hash["device_time"]
 
-                          response["mitigation_hash"] = mitigation_hash
+                          @response["mitigation_hash"] = mitigation_hash
 
                         end
 
                       else
 
-                        puts "sample_counter reported > 1 but did fine =< 1 when searching ES"
+                        BBNCommon.logger("INFO", "attack_sampled", "sample_counter reported > 1 but did fine =< 1 when searching ES for attack_id: #{sample_hash["attack_id"]}")
 
                       end
 
@@ -317,33 +326,141 @@ class BBNSyslog
 
               # If this occurs we should delete the attack_mlp message once discovered
 
-              puts "More then one entry in attacks with the same attack_id"
+              BBNCommon.logger("INFO", "attack_sampled", "More then one entry in attacks with the same attack_id: #{sample_hash["attack_id"]}")
 
             elsif mash.hits.total < 1
 
               # Did not return anything for attack_id. This can occur if we have a midstream pick up of the logs
-              # We need to created the attacks entry using attack sample data and set attack_mlp to 1
+              # We need to created the attacks entry using attack sample data and set attack_mlp to 1 if config
+              # attack_mlp is set to 1
 
-              puts "No entry found in attacks for attack_id"
+              BBNCommon.logger("INFO", "attack_sampled", "No attack entry found for attack_id: #{sample_hash["attack_id"]}")
+
+              if event["mlp_support"] == 1
+
+                BBNCommon.logger("INFO", "attack_sampled", "Creating an MLP attack entry based on Attack Sampled message for attack_id: #{sample_hash["attack_id"]}")
+
+                start_hash = {
+                    "remote_log_format" => "Syslog/Standard",
+                    "remote_log_payload" => message,
+                    "customer_id" => 0,
+                    "device_vendor" => "",
+                    "device_module" => "",
+                    "device_version" => "",
+                    "device_hostname" => "",
+                    "device_ip" => "",
+                    "device_time" => "",
+                    "device_utc_offset" => "",
+                    "bigip_dos_policy" => "",
+                    "bigip_policy_apply_date" => "",
+                    "bigip_virtual_server" => "",
+                    "bigip_route_domain" => "",
+                    "bigip_partition" => "",
+                    "bigip_flow_table_id" => "",
+                    "attack_name" => "",
+                    "attack_id" => 0,
+                    "attack_mlp" => 1,
+                    "attack_status" => "Attack Started",
+                    "attack_severity" => 0,
+                    "attack_category" => "",
+                    "attack_event_count" => 1,
+                    "attack_ongoing" => 1,
+                    "attack_source_ip" => "",
+                    "attack_source_port" => "",
+                    "attack_destination_ip" => "",
+                    "attack_destination_port" => "",
+                    "attack_start_date" => "",
+                    "attack_end_date" => "",
+                    "unknown_key_value_pair" => ""
+                }
+
+                record = nil
+                entry = nil
+
+                message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
+
+                  entry = record.split("=")
+
+                  if entry[0] == "device_vendor" and entry[1] != nil then start_hash["device_vendor"] = entry[1]
+
+                  elsif entry[0] == "device_product" and entry[1] != nil then start_hash["device_module"] = entry[1]
+
+                  elsif entry[0] == "device_version" and entry[1] != nil then start_hash["device_version"] = entry[1]
+
+                  elsif entry[0] == "hostname" and entry[1] != nil then start_hash["device_hostname"] = entry[1]
+
+                  elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then start_hash["device_ip"] = entry[1]
+
+                  elsif entry[0] == "date_time" and entry[1] != nil then start_hash["device_time"] = entry[1]
+
+                  elsif entry[0] == "context_name" and entry[1] != nil then start_hash["bigip_virtual_server"] = entry[1]
+
+                  elsif entry[0] == "route_domain" and entry[1] != nil then start_hash["bigip_route_domain"] = entry[1]
+
+                  elsif entry[0] == "partition_name" and entry[1] != nil then start_hash["bigip_partition"] = entry[1]
+
+                  elsif entry[0] == "flow_id" and entry[1] != nil then start_hash["bigip_flow_table_id"] = entry[1]
+
+                  elsif entry[0] == "dos_attack_name" and entry[1] != nil then start_hash["attack_name"] = entry[1]
+
+                  elsif entry[0] == "dos_attack_id" and entry[1] != nil then start_hash["attack_id"] = entry[1]
+
+                  elsif entry[0] == "severity" and entry[1] != nil then start_hash["attack_severity"] = entry[1]
+
+                  elsif entry[0] == "errdefs_msg_name" and entry[1] != nil then start_hash["attack_category"] = entry[1]
+
+                  elsif entry[0] == "date_time" and entry[1] != nil then start_hash["attack_started"] = entry[1]
+
+                  end
+
+                end
+
+                start_hash["attack_source_ip"] = sample_hash["attack_source_ip"]
+                start_hash["attack_source_port"] = sample_hash["attack_source_port"]
+                start_hash["attack_destination_ip"] = sample_hash["attack_destination_ip"]
+                start_hash["attack_destination_port"] = sample_hash["attack_destination_port"]
+
+                if sample_hash.has_key?("attack_mitigation_method")
+
+                  start_hash["attack_mitigation_method"] = sample_hash["attack_mitigation_method"]
+
+                end
+
+                start_hash["attack_start_date"] = start_hash["device_time"]
+
+                @response["start_hash"] = start_hash
+
+                mitigation_hash = Hash.new()
+                mitigation_hash["attack_id"] = sample_hash["attack_id"]
+                mitigation_hash["attack_mitigation_method"] = sample_hash["attack_mitigation_method"]
+                mitigation_hash["device_time"] = sample_hash["device_time"]
+
+                @response["mitigation_hash"] = mitigation_hash
+
+              else
+
+                return @response
+
+              end
+
 
             end
 
           else
 
             # Not sure when we would end up here
-            puts "Attack Sampled: Got response data from ES but missing total _key"
+            BBNCommon.logger("INFO", "attack_sampled", "Got response data from ES but missing total _key for attack_id: #{sample_hash["attack_id"]}")
 
           end
 
         else
 
           # Not sure when we would end up here
-          puts "Attack Sampled: Missing hits so therefore can not have total"
+          BBNCommon.logger("INFO", "attack_sampled", "Missing hits so therefore can not have total for attack_id: #{sample_hash["attack_id"]}")
 
         end
 
-        response["sample_hash"] = sample_hash
-        puts response
+        @response["sample_hash"] = sample_hash
 
         # Attack Started
       elsif entry[1] == "Attack Started"
@@ -368,6 +485,7 @@ class BBNSyslog
             "bigip_flow_table_id" => "",
             "attack_name" => "",
             "attack_id" => 0,
+            "attack_mlp" => 0,
             "attack_status" => "",
             "attack_severity" => 0,
             "attack_category" => "",
@@ -424,14 +542,12 @@ class BBNSyslog
 
         start_hash["attack_start_date"] = start_hash["device_time"]
 
-        response["start_hash"] = start_hash
+        @response["start_hash"] = start_hash
 
-        puts response
+        # Attack Stopped
+      elsif entry[1] == "Attack Stopped"
 
-        # Attack Ended
-      elsif entry[1] == "Attack Ended"
-
-        end_hash = {
+        stopped_hash = {
           "device_time" => "",
           "attack_id" => 0
         }
@@ -445,19 +561,19 @@ class BBNSyslog
 
           # Collect data
 
-          if entry[0] == "date_time" and entry[1] != nil then end_hash["device_time"] = entry[1]
+          if entry[0] == "date_time" and entry[1] != nil then stopped_hash["device_time"] = entry[1]
 
-          elsif entry[0] == "dos_attack_id" and entry[1] != nil then end_hash["attack_id"] = entry[1]
+          elsif entry[0] == "dos_attack_id" and entry[1] != nil then stopped_hash["attack_id"] = entry[1]
 
           end
 
         end
 
-        if end_hash["attack_id"] != 0
+        if stopped_hash["attack_id"] != 0
 
           begin
 
-            rsp = client.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: end_hash["attack_id"] } } }
+            rsp = client.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: stopped_hash["attack_id"] } } }
 
             #rescue => e
 
@@ -474,7 +590,7 @@ class BBNSyslog
                 begin
 
                   client.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
-                                body: { doc: { attack_ongoing: 0, attack_end_date: end_hash["device_time"] } }
+                                body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_time"] } }
 
                   #rescue => e
 
@@ -483,25 +599,26 @@ class BBNSyslog
               elsif mash.hits.total > 1
 
                 # This means we have more then one attacks with same attack_id needs to be logged
-                puts "Attack Ended: more then one attack with attack_id"
+                BBNCommon.logger("INFO", "attack_stopped", "more then one attack with attack_id: #{stopped_hash["attack_id"]}")
 
               elsif mash.hits.total < 1
 
                 # Did not return anything for attack_id needs to be logged
-                puts "Attack Ended: No attack with attack_id"
+                BBNCommon.logger("INFO", "attack_stopped", "No attack with attack_id: #{stopped_hash["attack_id"]}")
 
               end
+
             else
 
               # Not sure when we would end up here
-              puts "Attack Ended: got response data from ES but missing total _key"
+              BBNCommon.logger("INFO", "attack_stopped", "got response data from ES but missing total _key for attack_id: #{stopped_hash["attack_id"]}")
 
             end
 
           else
 
             # Not sure when we would end up here
-            puts "Attack Ended: Missing hits so therefore can not have total"
+            BBNCommon.logger("INFO", "attack_stopped", "Missing hits so therefore can not have total for attack_id: #{stopped_hash["attack_id"]}")
 
           end
 
@@ -587,11 +704,10 @@ class BBNSyslog
 
         end
 
-        puts syncookie_hash
-
       else
 
         # Unknown DoS Event
+        BBNCommon.logger("INFO", "Unknown", "Unknown DoS Event: #{message}")
 
       end
 
@@ -616,7 +732,7 @@ class BBNSyslog
 
     end
 
-    return response
+    return @response
 
   end
 

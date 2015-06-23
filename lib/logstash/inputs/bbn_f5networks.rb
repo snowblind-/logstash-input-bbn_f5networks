@@ -50,6 +50,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   # Protocol to use UDP/TCP or both
   config :log_collector_protocol, :validate => :array, :default => [ "udp" ]
 
+  # MLP Support allows you to make an attack entry out of an Attack Sampled message
+  config :mlp_support, :validate => :number, :default => 0
+
   # Default UTC Offset
   config :default_utc_offset, :validate => :string, :default => "UTC+0"
 
@@ -223,11 +226,21 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       return
     end
 
-    response = Hash.new()
+    event = Hash.new
+    event["message"] = data
 
-    parse(event, response)
+    response = Hash.new()
+    response = parse(event)
 
     response.each do |key, value|
+
+      if key == "sample_hash"
+        value["record_type"] = "mitigation_stats"
+      elsif key == "start_hash"
+        value["record_type"] = "attacks"
+      elsif key == "mitigation_hash"
+        value["record_type"] = "mitigations"
+      end
 
       queue << value
 
@@ -278,7 +291,11 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   end
 
   public
-  def parse(event, response)
+  def parse(event)
+
+    response = Hash.new()
+
+    event["mlp_support"] = mlp_support
 
     event["utc_offset"] = default_utc_offset
 
@@ -322,6 +339,8 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
       event["remote_log_format"] = "Unknown"
 
     end
+
+    return response
 
   end
 

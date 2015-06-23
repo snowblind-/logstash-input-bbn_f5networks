@@ -15,7 +15,7 @@
 
 class BBNCommon
 
-  def logger(loglevel, function, message)
+  def self.logger(loglevel, function, message)
 
     logger = Logger.new("/var/log/bbn/logstash-plugins/bbn_f5networks.log", "daily")
     logger.progname = "logstash-input-bbn_f5networks"
@@ -48,7 +48,7 @@ class BBNCommon
 
   end
 
-  def to_utc(dt,offset)
+  def self.to_utc(dt,offset)
 
     tdt = DateTime.parse(dt)
 
