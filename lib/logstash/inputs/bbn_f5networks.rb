@@ -242,7 +242,10 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
         value["record_type"] = "mitigations"
       end
 
-      queue << value
+      output = LogStash::Event.new(value)
+      decorate(output)
+
+      queue << output
 
     end
 

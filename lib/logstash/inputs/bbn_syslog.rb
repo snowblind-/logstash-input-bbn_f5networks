@@ -478,7 +478,6 @@ class BBNSyslog
             "device_time" => "",
             "device_utc_offset" => "",
             "bigip_dos_policy" => "",
-            "bigip_policy_apply_date" => "",
             "bigip_virtual_server" => "",
             "bigip_route_domain" => "",
             "bigip_partition" => "",
@@ -492,8 +491,8 @@ class BBNSyslog
             "attack_event_count" => 0,
             "attack_ongoing" => 1,
             "attack_start_date" => "",
-            "attack_end_date" => "",
-            "unknown_key_value_pair" => ""
+            "unknown_key_value_pair" => "",
+            "record_type" => "attacks"
         }
 
         record = nil
