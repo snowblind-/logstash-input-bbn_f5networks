@@ -777,7 +777,7 @@ class BBNSyslog
                 "cookie_challenge_passed" => "",
                 "cookie_flow_accepted" => "",
                 "cookie_flow_rejected" => "",
-                "record_type" => "trafficstats"
+                "record_type" => "traffic_stats"
             }
 
             record = nil
@@ -838,7 +838,7 @@ class BBNSyslog
                 "bigip_partition" => "",
                 "traffic_stat_type" => "",
                 "traffic_stat_count" => "",
-                "record_type" => "trafficstats"
+                "record_type" => "traffic_stats"
             }
 
             record = nil
@@ -893,7 +893,7 @@ class BBNSyslog
                 "bigip_partition" => "",
                 "traffic_stat_type" => "",
                 "traffic_stat_count" => "",
-                "record_type" => "trafficstats"
+                "record_type" => "traffic_stats"
             }
 
             record = nil
@@ -948,7 +948,7 @@ class BBNSyslog
                 "bigip_partition" => "",
                 "traffic_stat_type" => "",
                 "traffic_stat_count" => "",
-                "record_type" => "trafficstats"
+                "record_type" => "traffic_stats"
             }
 
             record = nil
