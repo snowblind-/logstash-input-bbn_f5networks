@@ -332,9 +332,17 @@ class BBNSyslog
               # happen when the Attack Start message has not reached elasticsearch just yet but we are processing a
               # attack sample message and therefor creating a new attacks entry using the attack sample data.
 
-              # If this occurs we should delete the attack_mlp message once discovered
+              # If this occurs we should delete the attack_mlp message once discovered, this can be more then one message
 
-              BBNCommon.logger("INFO", "attack_sampled", "More then one entry in attacks with the same attack_id: #{sample_hash["attack_id"]}")
+              begin
+
+                client.delete_by_query index: "bbn", type: "attacks",  body: { query: { term: { attack_id: sample_hash["attack_id"], attack_mlp: 1 } } }
+
+
+
+              end
+
+              BBNCommon.logger("INFO", "attack_sampled", "More then one entry in attacks with the same attack_id: #{sample_hash["attack_id"]}. Deleting all messages with mlp flag set to 1 for attack_id: #{sample_hash["attack_id"]}")
 
             elsif mash.hits.total < 1
 
