@@ -52,7 +52,7 @@ class BBNSyslog
             "attack_destination_ip" => "",
             "attack_destination_port" => "",
             "attack_destination_vlan" => "",
-            "record_type" => "mitigation_stats",
+            "record_type" => "attack_mitigation_stats",
             "remote_log_format" => "Syslog/Standard",
             "remote_log_payload" => message
         }
