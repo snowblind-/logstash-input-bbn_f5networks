@@ -36,6 +36,7 @@ class BBNSyslog
             "customer_id" => 0,
             "attack_id" => 0,
             "device_time" => "",
+            "device_utc_offset" => event["utc_offset"],
             "attack_status" => "",
             "attack_detection_rate" => 0,
             "attack_detection_matrix" => "",
