@@ -661,7 +661,7 @@ class BBNSyslog
             "device_hostname" => "",
             "device_ip" => "",
             "device_time" => "",
-            "device_utc_offset" => "",
+            "device_utc_offset" => event["utc_offset"],
             "bigip_dos_policy" => "",
             "bigip_virtual_server" => "",
             "bigip_route_domain" => "",
@@ -669,13 +669,16 @@ class BBNSyslog
             "bigip_flow_table_id" => "",
             "attack_name" => "",
             "attack_id" => 0,
+            "attack_mlp" => 0,
             "attack_status" => "",
             "attack_severity" => 0,
             "attack_category" => "",
             "attack_event_counter" => 0,
             "attack_ongoing" => 0,
             "attack_start_date" => "",
-            "unknown_key_value_pair" => ""
+            "attack_end_date" => "",
+            "unknown_key_value_pair" => "",
+            "record_type" => "attacks"
         }
 
         record = nil
@@ -716,15 +719,23 @@ class BBNSyslog
 
           end
 
-          syncookie_hash["attack_name"] = "TCP SYN flood"
+        end
 
-          syncookie_hash["attack_status"] = syncookie_hash["attack_mitigation_action"]
+        syncookie_hash["attack_name"] = "TCP SYN flood"
+        syncookie_hash["attack_status"] = syncookie_hash["attack_mitigation_action"]
+        syncookie_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
+        syncookie_hash["attack_mitigation_method"] = "Per Virtual Server SYN Cookie"
 
-          syncookie_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
+        if syncookie_hash["device_time"] != ""
 
-          syncookie_hash["attack_mitigation_method"] = "Per Virtual Server SYN Cookie"
+          syncookie_hash["device_time"] = BBNCommon.to_utc(syncookie_hash["device_time"], event["utc_offset"])
 
         end
+
+        syncookie_hash["attack_start_date"] = syncookie_hash["device_time"]
+        syncookie_hash["attack_end_date"] = syncookie_hash["device_time"]
+
+        @response["syncookie_hash"] = syncookie_hash
 
       else
 
@@ -742,13 +753,243 @@ class BBNSyslog
 
       if (entry[0].delete! '["') == "errdefs_msg_name" and (entry[1].delete! '"]') == "Traffic Statistics"
 
-        # Traffic statistics
+        record = message.scan(/traffic_stat_type=+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/)
+        entry = record.to_s.split("=")
 
-        # Can be either:
-        # traffic_stat_type="Cryptographic SYN Cookie"
-        # traffic_stat_type="Reaped Flow"
-        # traffic_stat_type="Active Flow"
-        # traffic_stat_type="Missed Flow"
+        if (entry[0].delete! '["') == "traffic_stat_type" and (entry[1].delete! '"]') != nil
+
+          if entry[1] == "Cryptographic SYN Cookie"
+
+            trafficstats_hash = {
+                "remote_log_format" => "Syslog/Standard",
+                "remote_log_payload" => message,
+                "device_utc_offset" => event["utc_offset"],
+                "device_hostname" => "",
+                "device_ip" => "",
+                "bigip_virtual_server" => "",
+                "device_time" => "",
+                "device_module" => "",
+                "device_vendor" => "",
+                "device_version" => "",
+                "bigip_partition" => "",
+                "traffic_stat_type" => "",
+                "cookie_challenge_issued" => "",
+                "cookie_challenge_passed" => "",
+                "cookie_flow_accepted" => "",
+                "cookie_flow_rejected" => "",
+                "record_type" => "trafficstats"
+            }
+
+            record = nil
+            entry = nil
+
+            # Loop through the syslog message to get the rest
+            message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
+
+              entry = record.split("=")
+
+              if entry[0] == "hostname" and entry[1] != nil then trafficstats_hash["device_hostname"] = entry[1]
+
+              elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
+
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+
+              elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
+
+              elsif entry[0] == "device_vendor" and entry[1] != nil then trafficstats_hash["device_vendor"] = entry[1]
+
+              elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
+
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+
+              elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
+
+              elsif entry[0] == "cookie_challenge_issued" and entry[1] != nil then trafficstats_hash["cookie_challenge_issued"] = entry[1]
+
+              elsif entry[0] == "cookie_challenge_passed" and entry[1] != nil then trafficstats_hash["cookie_challenge_passed"] = entry[1]
+
+              elsif entry[0] == "cookie_flow_accepted" and entry[1] != nil then trafficstats_hash["cookie_flow_accepted"] = entry[1]
+
+              elsif entry[0] == "cookie_flow_rejected" and entry[1] != nil then trafficstats_hash["cookie_flow_rejected"] = entry[1]
+
+              end
+
+            end
+
+            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+
+            @response["trafficstats_hash"] = trafficstats_hash
+
+          elsif entry[1] == "Reaped Flow"
+
+            trafficstats_hash = {
+                "remote_log_format" => "Syslog/Standard",
+                "remote_log_payload" => message,
+                "device_utc_offset" => event["utc_offset"],
+                "device_hostname" => "",
+                "device_ip" => "",
+                "bigip_virtual_server" => "",
+                "device_time" => "",
+                "device_module" => "",
+                "device_vendor" => "",
+                "device_version" => "",
+                "bigip_partition" => "",
+                "traffic_stat_type" => "",
+                "traffic_stat_count" => "",
+                "record_type" => "trafficstats"
+            }
+
+            record = nil
+            entry = nil
+
+            # Loop through the syslog message to get the rest
+            message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
+
+              entry = record.split("=")
+
+              if entry[0] == "hostname" and entry[1] != nil then trafficstats_hash["device_hostname"] = entry[1]
+
+              elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
+
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+
+              elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
+
+              elsif entry[0] == "device_vendor" and entry[1] != nil then trafficstats_hash["device_vendor"] = entry[1]
+
+              elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
+
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+
+              elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
+
+              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_count"] = entry[1]
+
+              end
+
+            end
+
+            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+
+            @response["trafficstats_hash"] = trafficstats_hash
+
+          elsif entry[1] == "Active Flow"
+
+            trafficstats_hash = {
+                "remote_log_format" => "Syslog/Standard",
+                "remote_log_payload" => message,
+                "device_utc_offset" => event["utc_offset"],
+                "device_hostname" => "",
+                "device_ip" => "",
+                "bigip_virtual_server" => "",
+                "device_time" => "",
+                "device_module" => "",
+                "device_vendor" => "",
+                "device_version" => "",
+                "bigip_partition" => "",
+                "traffic_stat_type" => "",
+                "traffic_stat_count" => "",
+                "record_type" => "trafficstats"
+            }
+
+            record = nil
+            entry = nil
+
+            # Loop through the syslog message to get the rest
+            message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
+
+              entry = record.split("=")
+
+              if entry[0] == "hostname" and entry[1] != nil then trafficstats_hash["device_hostname"] = entry[1]
+
+              elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
+
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+
+              elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
+
+              elsif entry[0] == "device_vendor" and entry[1] != nil then trafficstats_hash["device_vendor"] = entry[1]
+
+              elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
+
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+
+              elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
+
+              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_count"] = entry[1]
+
+              end
+
+            end
+
+            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+
+            @response["trafficstats_hash"] = trafficstats_hash
+
+          elsif entry[1] == "Missed Flow"
+
+            trafficstats_hash = {
+                "remote_log_format" => "Syslog/Standard",
+                "remote_log_payload" => message,
+                "device_utc_offset" => event["utc_offset"],
+                "device_hostname" => "",
+                "device_ip" => "",
+                "bigip_virtual_server" => "",
+                "device_time" => "",
+                "device_module" => "",
+                "device_vendor" => "",
+                "device_version" => "",
+                "bigip_partition" => "",
+                "traffic_stat_type" => "",
+                "traffic_stat_count" => "",
+                "record_type" => "trafficstats"
+            }
+
+            record = nil
+            entry = nil
+
+            # Loop through the syslog message to get the rest
+            message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
+
+              entry = record.split("=")
+
+              if entry[0] == "hostname" and entry[1] != nil then trafficstats_hash["device_hostname"] = entry[1]
+
+              elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
+
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+
+              elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
+
+              elsif entry[0] == "device_vendor" and entry[1] != nil then trafficstats_hash["device_vendor"] = entry[1]
+
+              elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
+
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+
+              elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
+
+              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_count"] = entry[1]
+
+              end
+
+            end
+
+            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+
+            @response["trafficstats_hash"] = trafficstats_hash
+
+          end
+
+        end
 
       end
 

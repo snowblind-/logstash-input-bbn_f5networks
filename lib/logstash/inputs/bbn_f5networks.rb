@@ -53,6 +53,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
   # MLP Support allows you to make an attack entry out of an Attack Sampled message
   config :mlp_support, :validate => :number, :default => 0
 
+  # Store the original log message together with the event
+  config :store_original_payload, :validate => :boolean, :default => true
+
   # Default UTC Offset
   config :default_utc_offset, :validate => :string, :default => "0"
 
