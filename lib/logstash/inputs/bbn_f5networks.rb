@@ -231,6 +231,7 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     event = Hash.new
     event["message"] = data
+    event["host"] = host
 
     response = Hash.new()
     response = parse(event)
@@ -304,9 +305,6 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
     elsif explicit_utc_offset.length >= 1
 
       explicit_utc_offset.each do |key,value|
-
-        puts key
-        puts value
 
         if event["host"] == key
 
