@@ -305,6 +305,9 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
       explicit_utc_offset.each do |key,value|
 
+        puts key
+        puts value
+
         if event["host"] == key
 
           event["utc_offset"] = value
