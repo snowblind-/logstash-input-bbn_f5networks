@@ -733,6 +733,8 @@ class BBNCef
 
           if start_hash["virtual_context"] != ""
 
+            puts start_hash["virtual_context"]
+
             record = message.scan(/[a-zA-Z0-9]*(?=\/)/)
 
             start_hash["administration_partition"] = record
@@ -793,6 +795,8 @@ class BBNCef
             end
 
           end
+
+          puts "test"
 
           if sample_hash["device_time"] != ""
 
