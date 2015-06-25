@@ -733,9 +733,9 @@ class BBNCef
 
           if start_hash["virtual_context"] != ""
 
-            puts start_hash["virtual_context"]
+            vc = start_hash["virtual_context"]
 
-            record = message.scan(/[a-zA-Z0-9]*(?=\/)/)
+            record = vc.scan(/[a-zA-Z0-9]*(?=\/)/)
 
             start_hash["administration_partition"] = record
 
@@ -796,14 +796,14 @@ class BBNCef
 
           end
 
-          puts "test"
-
           if sample_hash["device_time"] != ""
 
             sample_hash["device_time"] = BBNCommon.to_utc(sample_hash["device_time"], event["utc_offset"])
             sample_hash["attack_start_date"] = sample_hash["device_time"]
 
           end
+
+          puts "test"
 
           @request["sample_hash"] = sample_hash
 
