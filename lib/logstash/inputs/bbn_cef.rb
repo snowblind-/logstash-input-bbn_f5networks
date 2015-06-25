@@ -735,10 +735,10 @@ class BBNCef
 
             vc = start_hash["virtual_context"]
 
-            record = vc.scan(/[a-zA-Z0-9]*(?=\/)/)
+            record = vc.scan(/\w+/)
 
-            start_hash["administration_partition"] = record.to_s
-            
+            start_hash["administration_partition"] = record[0]
+
           end
 
           @response["start_hash"] = start_hash
