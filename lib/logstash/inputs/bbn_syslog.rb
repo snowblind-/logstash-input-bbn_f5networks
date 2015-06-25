@@ -35,6 +35,7 @@ class BBNSyslog
         sample_hash = {
             "customer_id" => 0,
             "attack_id" => 0,
+            "attack_type" => 1,
             "device_time" => "",
             "device_utc_offset" => event["utc_offset"],
             "attack_status" => "",
@@ -54,7 +55,7 @@ class BBNSyslog
             "attack_destination_port" => "",
             "attack_destination_vlan" => "",
             "record_type" => "attack_mitigation_stats",
-            "remote_log_format" => "Syslog/Standard",
+            "remote_log_format" => "Syslog",
             "remote_log_payload" => message
         }
 
@@ -91,7 +92,7 @@ class BBNSyslog
 
           elsif entry[0] == "date_time" and entry[1] != nil then sample_hash["device_time"] = entry[1]
 
-          elsif entry[0] == "context_name" and entry[1] != nil then sample_hash["bigip_virtual_server"] = entry[1]
+          elsif entry[0] == "context_name" and entry[1] != nil then sample_hash["virtual_context"] = entry[1]
 
           elsif entry[0] == "errdefs_msg_name" and entry[1] != nil then sample_hash["attack_category"] = entry[1]
 
@@ -107,7 +108,7 @@ class BBNSyslog
 
         if sample_hash["attack_category"] == "DNS Event" and sample_hash["attack_dns_query_type"] != ""
 
-          if sample_hash["bigip_virtual_server"] != ""
+          if sample_hash["virtual_context"] != ""
 
             sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
 
@@ -176,13 +177,14 @@ class BBNSyslog
             "device_ip" => "",
             "device_time" => "",
             "device_utc_offset" => event["utc_offset"],
-            "bigip_virtual_server" => "",
-            "bigip_route_domain" => "",
-            "bigip_partition" => "",
-            "bigip_flow_table_id" => "",
+            "virtual_context" => "",
+            "virtual_routing_table" => "",
+            "administration_partition" => "",
+            "flow_table_id" => "",
             "attack_mlp" => 0,
             "attack_name" => "",
             "attack_id" => 0,
+            "attack_type" => 1,
             "attack_status" => "",
             "attack_severity" => 0,
             "attack_category" => "",
@@ -190,7 +192,7 @@ class BBNSyslog
             "attack_start_date" => "",
             "unknown_key_value_pair" => "",
             "record_type" => "attacks",
-            "remote_log_format" => "Syslog/Standard",
+            "remote_log_format" => "Syslog",
             "remote_log_payload" => message
         }
 
@@ -214,13 +216,13 @@ class BBNSyslog
 
           elsif entry[0] == "date_time" and entry[1] != nil then start_hash["device_time"] = entry[1]
 
-          elsif entry[0] == "context_name" and entry[1] != nil then start_hash["bigip_virtual_server"] = entry[1]
+          elsif entry[0] == "context_name" and entry[1] != nil then start_hash["virtual_context"] = entry[1]
 
-          elsif entry[0] == "route_domain" and entry[1] != nil then start_hash["bigip_route_domain"] = entry[1]
+          elsif entry[0] == "route_domain" and entry[1] != nil then start_hash["virtual_routing_table"] = entry[1]
 
-          elsif entry[0] == "partition_name" and entry[1] != nil then start_hash["bigip_partition"] = entry[1]
+          elsif entry[0] == "partition_name" and entry[1] != nil then start_hash["administration_partition"] = entry[1]
 
-          elsif entry[0] == "flow_id" and entry[1] != nil then start_hash["bigip_flow_table_id"] = entry[1]
+          elsif entry[0] == "flow_id" and entry[1] != nil then start_hash["flow_table_id"] = entry[1]
 
           elsif entry[0] == "dos_attack_name" and entry[1] != nil then start_hash["attack_name"] = entry[1]
 
@@ -335,7 +337,7 @@ class BBNSyslog
       elsif entry[1] == "TCP Syncookie"
 
         syncookie_hash = {
-            "remote_log_format" => "Syslog/Standard",
+            "remote_log_format" => "Syslog",
             "remote_log_payload" => message,
             "customer_id" => 0,
             "device_vendor" => "",
@@ -345,13 +347,14 @@ class BBNSyslog
             "device_ip" => "",
             "device_time" => "",
             "device_utc_offset" => event["utc_offset"],
-            "bigip_dos_policy" => "",
-            "bigip_virtual_server" => "",
-            "bigip_route_domain" => "",
-            "bigip_partition" => "",
-            "bigip_flow_table_id" => "",
+            "policy_name" => "",
+            "virtual_context" => "",
+            "virtual_routing_table" => "",
+            "administration_partition" => "",
+            "flow_table_id" => "",
             "attack_name" => "",
             "attack_id" => 0,
+            "attack_type" => 1,
             "attack_mlp" => 0,
             "attack_status" => "",
             "attack_severity" => 0,
@@ -386,13 +389,13 @@ class BBNSyslog
 
           elsif entry[0] == "action" and entry[1] != nil then syncookie_hash["attack_mitigation_action"] = entry[1]
 
-          elsif entry[0] == "context_name" and entry[1] != nil then syncookie_hash["bigip_virtual_server"] = entry[1]
+          elsif entry[0] == "context_name" and entry[1] != nil then syncookie_hash["virtual_context"] = entry[1]
 
-          elsif entry[0] == "route_domain" and entry[1] != nil then syncookie_hash["bigip_route_domain"] = entry[1]
+          elsif entry[0] == "route_domain" and entry[1] != nil then syncookie_hash["virtual_routing_table"] = entry[1]
 
-          elsif entry[0] == "partition_name" and entry[1] != nil then syncookie_hash["bigip_partition"] = entry[1]
+          elsif entry[0] == "partition_name" and entry[1] != nil then syncookie_hash["administration_partition"] = entry[1]
 
-          elsif entry[0] == "flow_id" and entry[1] != nil then syncookie_hash["bigip_flow_table_id"] = entry[1]
+          elsif entry[0] == "flow_id" and entry[1] != nil then syncookie_hash["flow_table_id"] = entry[1]
 
           elsif entry[0] == "dos_attack_event" and entry[1] != nil then syncookie_hash["attack_status"] = entry[1]
 
@@ -444,17 +447,17 @@ class BBNSyslog
           if entry[1] == "Cryptographic SYN Cookie"
 
             trafficstats_hash = {
-                "remote_log_format" => "Syslog/Standard",
+                "remote_log_format" => "Syslog",
                 "remote_log_payload" => message,
                 "device_utc_offset" => event["utc_offset"],
                 "device_hostname" => "",
                 "device_ip" => "",
-                "bigip_virtual_server" => "",
+                "virtual_context" => "",
                 "device_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
-                "bigip_partition" => "",
+                "administration_partition" => "",
                 "traffic_stat_type" => "",
                 "cookie_challenge_issued" => "",
                 "cookie_challenge_passed" => "",
@@ -475,7 +478,7 @@ class BBNSyslog
 
               elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
 
-              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
               elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
 
@@ -485,7 +488,7 @@ class BBNSyslog
 
               elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
 
-              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["administration_partition"] = entry[1]
 
               elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
 
@@ -508,19 +511,19 @@ class BBNSyslog
           elsif entry[1] == "Reaped Flow"
 
             trafficstats_hash = {
-                "remote_log_format" => "Syslog/Standard",
+                "remote_log_format" => "Syslog",
                 "remote_log_payload" => message,
                 "device_utc_offset" => event["utc_offset"],
                 "device_hostname" => "",
                 "device_ip" => "",
-                "bigip_virtual_server" => "",
+                "virtual_context" => "",
                 "device_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
-                "bigip_partition" => "",
+                "administration_partition" => "",
                 "traffic_stat_type" => "",
-                "traffic_stat_count" => "",
+                "traffic_stat_counter" => "",
                 "record_type" => "traffic_stats"
             }
 
@@ -536,7 +539,7 @@ class BBNSyslog
 
               elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
 
-              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
               elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
 
@@ -546,11 +549,11 @@ class BBNSyslog
 
               elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
 
-              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["administration_partition"] = entry[1]
 
               elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
 
-              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_count"] = entry[1]
+              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_counter"] = entry[1]
 
               end
 
@@ -563,19 +566,19 @@ class BBNSyslog
           elsif entry[1] == "Active Flow"
 
             trafficstats_hash = {
-                "remote_log_format" => "Syslog/Standard",
+                "remote_log_format" => "Syslog",
                 "remote_log_payload" => message,
                 "device_utc_offset" => event["utc_offset"],
                 "device_hostname" => "",
                 "device_ip" => "",
-                "bigip_virtual_server" => "",
+                "virtual_context" => "",
                 "device_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
-                "bigip_partition" => "",
+                "administration_partition" => "",
                 "traffic_stat_type" => "",
-                "traffic_stat_count" => "",
+                "traffic_stat_counter" => "",
                 "record_type" => "traffic_stats"
             }
 
@@ -591,7 +594,7 @@ class BBNSyslog
 
               elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
 
-              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
               elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
 
@@ -601,11 +604,11 @@ class BBNSyslog
 
               elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
 
-              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["administration_partition"] = entry[1]
 
               elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
 
-              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_count"] = entry[1]
+              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_counter"] = entry[1]
 
               end
 
@@ -618,19 +621,19 @@ class BBNSyslog
           elsif entry[1] == "Missed Flow"
 
             trafficstats_hash = {
-                "remote_log_format" => "Syslog/Standard",
+                "remote_log_format" => "Syslog",
                 "remote_log_payload" => message,
                 "device_utc_offset" => event["utc_offset"],
                 "device_hostname" => "",
                 "device_ip" => "",
-                "bigip_virtual_server" => "",
+                "virtual_context" => "",
                 "device_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
-                "bigip_partition" => "",
+                "administration_partition" => "",
                 "traffic_stat_type" => "",
-                "traffic_stat_count" => "",
+                "traffic_stat_counter" => "",
                 "record_type" => "traffic_stats"
             }
 
@@ -646,7 +649,7 @@ class BBNSyslog
 
               elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then trafficstats_hash["device_ip"] = entry[1]
 
-              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["bigip_virtual_server"] = entry[1]
+              elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
               elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
 
@@ -656,11 +659,11 @@ class BBNSyslog
 
               elsif entry[0] == "device_version" and entry[1] != nil then trafficstats_hash["device_version"] = entry[1]
 
-              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["bigip_partition"] = entry[1]
+              elsif entry[0] == "partition_name" and entry[1] != nil then trafficstats_hash["administration_partition"] = entry[1]
 
               elsif entry[0] == "traffic_stat_type" and entry[1] != nil then trafficstats_hash["traffic_stat_type"] = entry[1]
 
-              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_count"] = entry[1]
+              elsif entry[0] == "traffic_stat_cnt" and entry[1] != nil then trafficstats_hash["traffic_stat_counter"] = entry[1]
 
               end
 
