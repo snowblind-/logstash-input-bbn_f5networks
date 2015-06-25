@@ -4,6 +4,8 @@ class BBNCef
 
     @response = Hash.new()
     cef_message = Hash.new()
+    cef_dynamic_message = Hash.new()
+
     client = Elasticsearch::Client.new
 
     message = event["message"]
@@ -153,9 +155,9 @@ class BBNCef
 
         cef_dynamic2_message.each do |key,value|
 
-          if key == "dos_packets_received" and value != nil then cef_message["attack_detection_rate"] = value
+          if key == "dos_packets_received" and value != nil then cef_message["attack_detection_rate"] = value.to_i
 
-          elsif key == "dos_packets_dropped" and value != nil then cef_message["attack_drop_rate"] = value
+          elsif key == "dos_packets_dropped" and value != nil then cef_message["attack_drop_rate"] = value.to_i
 
           elsif key == "virtual_name" and value != nil then cef_message["virtual_context"] = value
 
@@ -390,11 +392,11 @@ class BBNCef
 
             elsif key == "attack_category" and value != nil then sample_hash["attack_category"] = value
 
-            elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value
+            elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value.to_i
 
             elsif key == "attack_detection_matrix" and value != nil then sample_hash["attack_detection_matrix"] = value
 
-            elsif key == "attack_drop_rate" and value != nil then sample_hash["attack_drop_rate"] = value
+            elsif key == "attack_drop_rate" and value != nil then sample_hash["attack_drop_rate"] = value.to_i
 
             elsif key == "attack_drop_matrix" and value != nil then sample_hash["attack_drop_matrix"] = value
 
@@ -595,9 +597,9 @@ class BBNCef
 
           elsif key == "detection_mode" and value != nil then cef_message["attack_detection_method"] = value
 
-          elsif key == "detection_average" and value != nil then cef_message["attack_detection_rate"] = value
+          elsif key == "detection_average" and value != nil then cef_message["attack_detection_rate"] = value.to_i
 
-          elsif key == "dropped_requests" and value != nil then cef_message["attack_drop_rate"] = value
+          elsif key == "dropped_requests" and value != nil then cef_message["attack_drop_rate"] = value.to_i
 
           else
 
@@ -698,13 +700,13 @@ class BBNCef
 
             elsif key == "attack_category" and value != nil then start_hash["attack_category"] = value
 
-            elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value
+            elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value.to_i
 
             elsif key == "attack_detection_matrix" and value != nil then sample_hash["attack_detection_matrix"] = value
 
             elsif key == "attack_detection_method" and value != nil then sample_hash["attack_detection_method"] = value
 
-            elsif key == "attack_drop_rate" and value != nil then sample_hash["attack_drop_rate"] = value
+            elsif key == "attack_drop_rate" and value != nil then sample_hash["attack_drop_rate"] = value.to_i
 
             elsif key == "attack_mitigation_method" and value != nil then sample_hash["attack_mitigation_method"] = value
 
@@ -772,13 +774,13 @@ class BBNCef
 
             elsif key == "attack_status" and value != nil then sample_hash["attack_status"] = value
 
-            elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value
+            elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value.to_i
 
             elsif key == "attack_detection_matrix" and value != nil then sample_hash["attack_detection_matrix"] = value
 
             elsif key == "attack_detection_method" and value != nil then sample_hash["attack_detection_method"] = value
 
-            elsif key == "attack_drop_rate" and value != nil then sample_hash["attack_drop_rate"] = value
+            elsif key == "attack_drop_rate" and value != nil then sample_hash["attack_drop_rate"] = value.to_i
 
             elsif key == "attack_mitigation_method" and value != nil then sample_hash["attack_mitigation_method"] = value
 
