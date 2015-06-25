@@ -323,13 +323,15 @@ class LogStash::Inputs::F5Networks < LogStash::Inputs::Base
 
     if message[0..4] == "<134>"
 
-      event["remote_log_format"] = "Syslog/Standard"
+      event["remote_log_format"] = "Syslog"
 
       response = BBNSyslog.parse_syslog(event)
 
     elsif message[0..4] == "CEF:0"
 
-      event["remote_log_format"] = "Syslog/CEF"
+      event["remote_log_format"] = "CEF"
+
+      response = BBNCef.parse_cef(event)
 
     else
 
