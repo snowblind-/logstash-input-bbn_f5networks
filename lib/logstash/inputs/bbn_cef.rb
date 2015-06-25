@@ -737,8 +737,8 @@ class BBNCef
 
             record = vc.scan(/[a-zA-Z0-9]*(?=\/)/)
 
-            start_hash["administration_partition"] = record
-
+            start_hash["administration_partition"] = record.to_s
+            
           end
 
           @response["start_hash"] = start_hash
@@ -803,9 +803,7 @@ class BBNCef
 
           end
 
-          puts "test"
-
-          @request["sample_hash"] = sample_hash
+          @response["sample_hash"] = sample_hash
 
         elsif cef_message["attack_status"] == "Mitigation changed"
 
