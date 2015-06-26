@@ -351,9 +351,9 @@ class BBNCef
               "device_utc_offset" => event["utc_offset"],
               "attack_status" => "",
               "attack_detection_rate" => 0,
-              "attack_detection_matrix" => "TPS",
+              "attack_detection_matrix" => "PPS",
               "attack_drop_rate" => 0,
-              "attack_drop_matrix" => "TPS",
+              "attack_drop_matrix" => "PPS",
               "attack_mitigation_method" => "",
               "attack_mitigation_action" => "",
               "attack_request_resource" => "",
@@ -445,6 +445,13 @@ class BBNCef
           if sample_hash.has_key?("virtual_context") and sample_hash["virtual_context"] != ""
 
             sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
+
+            if sample_hash["attack_category"] == "DNS Event"
+
+              sample_hash["attack_detection_matrix"] = "QPS"
+              sample_hash["attack_drop_matrix"] = "QPS"
+
+            end
 
             sample_hash.delete("virtual_context")
 
