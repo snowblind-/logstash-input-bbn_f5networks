@@ -329,6 +329,16 @@ class BBNCef
 
           end
 
+          if start_hash.has_key?("virtual_context") and start_hash["virtual_context"] != ""
+
+            vc = start_hash["virtual_context"]
+
+            record = vc.scan(/\w+/)
+
+            start_hash["administration_partition"] = record[0]
+
+          end
+
           @response["start_hash"] = start_hash
 
         elsif cef_message["attack_status"] == "Attack Sampled"
