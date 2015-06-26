@@ -306,7 +306,7 @@ class BBNCef
 
             elsif key == "administration_partition" and value != nil then start_hash["administration_partition"] = value
 
-            elsif key == "flow_table_id" and value != nil then start_hash["flow_table_id"] = value
+            elsif key == "flow_table_id" and value != "0000000000000000" then start_hash["flow_table_id"] = value
 
             elsif key == "attack_name" and value != nil then start_hash["attack_name"] = value
 
@@ -466,6 +466,14 @@ class BBNCef
 
             end
 
+          end
+
+          if sample_hash.has_key?("attack_name")
+            sample_hash.delete("attack_name")
+          end
+
+          if sample_hash.has_key?("attack_category")
+            sample_hash.delete("attack_category")
           end
 
           #if sample_hash["attack_name"] == "" and sample_hash["attack_status"] == "TCP Syncookie"
