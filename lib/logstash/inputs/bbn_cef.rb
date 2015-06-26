@@ -433,61 +433,64 @@ class BBNCef
 
           end
 
-          if sample_hash["attack_category"] == "DNS Event" and sample_hash["attack_dns_query_type"] != ""
+          if sample_hash.has_key?("virtual_context") and sample_hash["virtual_context"] != ""
 
-            if sample_hash.has_key?("virtual_context")
+            #if sample_hash["attack_category"] == "DNS Event" and sample_hash["attack_dns_query_type"] != ""
 
-              sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
+            sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
+
+            #end
+
+          else
+
+            if sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
+
+              sample_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
+
+            elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
+
+              sample_hash["attack_mitigation_method"] = "Device-Wide Detection"
+
+            elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Flood attack"
+
+              sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+            elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Flood attack"
+
+              sample_hash["attack_mitigation_method"] = "Source-IP Detection"
+
+            elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Sweep attack"
+
+              sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+            elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Sweep attack"
+
+              sample_hash["attack_mitigation_method"] = "Source-IP Detection"
 
             end
 
-          end
-
-          if sample_hash["attack_name"] == "" and sample_hash["attack_status"] == "TCP Syncookie"
-
-            sample_hash["attack_name"] = "TCP SYN flood"
-
-            sample_hash["attack_status"] = sample_hash["attack_mitigation_action"]
-
-            sample_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
-
-            sample_hash["attack_mitigation_method"] = "Virtual Server SYN Cookie"
 
           end
 
-          if sample_hash["attack_category"] == "Traffic Statistics"
+          #if sample_hash["attack_name"] == "" and sample_hash["attack_status"] == "TCP Syncookie"
 
-            sample_hash["attack_name"] = sample_hash["attack_category"]
+          #  sample_hash["attack_name"] = "TCP SYN flood"
 
-            sample_hash["attack_category"] = "Network DoS Event"
+          #  sample_hash["attack_status"] = sample_hash["attack_mitigation_action"]
 
-          end
+          #  sample_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
 
-          if sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
+          #  sample_hash["attack_mitigation_method"] = "Virtual Server SYN Cookie"
 
-            sample_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
+          #end
 
-          elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
+          #if sample_hash["attack_category"] == "Traffic Statistics"
 
-            sample_hash["attack_mitigation_method"] = "Device-Wide Detection"
+          #  sample_hash["attack_name"] = sample_hash["attack_category"]
 
-          elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Flood attack"
+          #  sample_hash["attack_category"] = "Network DoS Event"
 
-            sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
-
-          elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Flood attack"
-
-            sample_hash["attack_mitigation_method"] = "Source-IP Detection"
-
-          elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Sweep attack"
-
-            sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
-
-          elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Sweep attack"
-
-            sample_hash["attack_mitigation_method"] = "Source-IP Detection"
-
-          end
+          #end
 
           @response["sample_hash"] = sample_hash
 
