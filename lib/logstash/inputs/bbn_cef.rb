@@ -619,6 +619,8 @@ class BBNCef
 
           elsif key == "dropped_requests" and value != nil then cef_message["attack_drop_rate"] = value.to_i
 
+          elsif key == "source_address" and value != "" then cef_message["attack_source_ip"] = value
+
           else
 
             # Unknown key/value pairs or key's we don't care about normalizing
@@ -729,7 +731,7 @@ class BBNCef
 
             elsif key == "attack_request_resource" and value != nil then sample_hash["attack_request_resource"] = value
 
-            elsif key == "attack_source_ip" and value != nil then sample_hash["attack_source_ip"] = value
+            elsif key == "attack_source_ip" and value != "" then sample_hash["attack_source_ip"] = value
 
             end
 
