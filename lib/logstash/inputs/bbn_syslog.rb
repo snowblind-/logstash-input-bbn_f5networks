@@ -357,9 +357,6 @@ class BBNSyslog
             "record_type" => "attacks"
         }
 
-        record = nil
-        entry = nil
-
         # Loop through the syslog message to get the rest
         message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
 
