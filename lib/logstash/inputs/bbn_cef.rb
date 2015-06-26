@@ -435,11 +435,9 @@ class BBNCef
 
           if sample_hash.has_key?("virtual_context") and sample_hash["virtual_context"] != ""
 
-            #if sample_hash["attack_category"] == "DNS Event" and sample_hash["attack_dns_query_type"] != ""
-
             sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
 
-            #end
+            sample_hash.delete("virtual_context")
 
           else
 
@@ -468,7 +466,6 @@ class BBNCef
               sample_hash["attack_mitigation_method"] = "Source-IP Detection"
 
             end
-
 
           end
 
