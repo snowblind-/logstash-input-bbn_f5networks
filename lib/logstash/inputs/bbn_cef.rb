@@ -159,7 +159,7 @@ class BBNCef
 
           elsif key == "dos_packets_dropped" and value != nil then cef_message["attack_drop_rate"] = value.to_i
 
-          elsif key == "virtual_name" and value != nil then cef_message["virtual_context"] = value
+          elsif key == "virtual_name" and value != "" then cef_message["virtual_context"] = value
 
           elsif key == "vlan" and value != nil then cef_message["attack_destination_vlan"] = value
 
@@ -300,7 +300,7 @@ class BBNCef
 
             elsif key == "device_time" and value != nil then start_hash["device_time"] = value
 
-            elsif key == "virtual_context" and value != nil then start_hash["virtual_context"] = value
+            elsif key == "virtual_context" and value != "" then start_hash["virtual_context"] = value
 
             elsif key == "virtual_routing_table" and value != nil then start_hash["virtual_routing_table"] = value
 
@@ -375,7 +375,7 @@ class BBNCef
 
             elsif key == "device_time" and value != nil then sample_hash["device_time"] = value
 
-            elsif key == "virtual_context" and value != nil then sample_hash["virtual_context"] = value
+            elsif key == "virtual_context" and value != "" then sample_hash["virtual_context"] = value
 
             elsif key == "virtual_routing_table" and value != nil then sample_hash["virtual_routing_table"] = value
 
@@ -435,7 +435,7 @@ class BBNCef
 
           if sample_hash["attack_category"] == "DNS Event" and sample_hash["attack_dns_query_type"] != ""
 
-            if sample_hash["virtual_context"] != ""
+            if sample_hash.has_key?("virtual_context")
 
               sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
 
@@ -592,7 +592,7 @@ class BBNCef
 
           elsif key == "policy_apply_date" and value != nil then cef_message["policy_apply_date"] = value
 
-          elsif key == "Virtual Server" and value != nil then cef_message["virtual_context"] = value
+          elsif key == "Virtual Server" and value != "" then cef_message["virtual_context"] = value
 
           elsif key == "policy_name" and value != nil then cef_message["policy_name"] = value
 
@@ -688,7 +688,7 @@ class BBNCef
 
             elsif key == "device_time" and value != nil then start_hash["device_time"] = value
 
-            elsif key == "virtual_context" and value != nil then start_hash["virtual_context"] = value
+            elsif key == "virtual_context" and value != "" then start_hash["virtual_context"] = value
 
             elsif key == "attack_name" and value != nil then start_hash["attack_name"] = value
 
@@ -729,7 +729,7 @@ class BBNCef
 
           sample_hash["attack_status"] = "Mitigation stats"
 
-          if start_hash["virtual_context"] != ""
+          if start_hash.has_key?("virtual_context")
 
             vc = start_hash["virtual_context"]
 
