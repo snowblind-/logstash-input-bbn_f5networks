@@ -185,9 +185,9 @@ class BBNCef
 
           elsif key == "dos_attack_name" and value != nil then cef_message["tmp_attack_name"] = value
 
-          elsif key == "destination_address" and value != nil then cef_message["attack_destination_ip"] = value
+          elsif key == "destination_address" and value != "" then cef_message["attack_destination_ip"] = value
 
-          elsif key == "source_address" and value != nil then cef_message["attack_source_ip"] = value
+          elsif key == "source_address" and value != "" then cef_message["attack_source_ip"] = value
 
           else
 
