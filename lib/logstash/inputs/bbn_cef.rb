@@ -167,8 +167,6 @@ class BBNCef
 
           elsif key == "attack_status" and value != nil then cef_message["attack_status"] = value
 
-          elsif key == "context_name" and value != nil then cef_message["virtual_context"] = value
-
           elsif key == "traffic_stat_type" and value != nil then cef_message["traffic_stat_type"] = value
 
           elsif key == "traffic_stat_cnt" and value != nil then cef_message["traffic_stat_counter"] = value
@@ -187,10 +185,13 @@ class BBNCef
 
           elsif key == "dos_attack_name" and value != nil then cef_message["tmp_attack_name"] = value
 
+          elsif key == "destination_address" and value != nil then cef_message["attack_destination_ip"] = value
+
+          elsif key == "source_address" and value != nil then cef_message["attack_source_ip"] = value
+
           else
 
-            # Unknown key/value pairs or key's we don't care about normalizing
-            BBNCommon.logger("DEBUG", "parse_cef", "Unknown key/value pairs or key's we dont care about normalizing for AFM #{key} = #{value}")
+            BBNCommon.logger("INFO", "parse_cef:AFM", "Unknown key/value pairs or key we dont normalizing for AFM #{key} = #{value}")
 
           end
 
@@ -340,9 +341,9 @@ class BBNCef
               "device_utc_offset" => event["utc_offset"],
               "attack_status" => "",
               "attack_detection_rate" => 0,
-              "attack_detection_matrix" => "",
+              "attack_detection_matrix" => "TPS",
               "attack_drop_rate" => 0,
-              "attack_drop_matrix" => "",
+              "attack_drop_matrix" => "TPS",
               "attack_mitigation_method" => "",
               "attack_mitigation_action" => "",
               "attack_request_resource" => "",
@@ -612,14 +613,11 @@ class BBNCef
 
         if cef_message.has_key?("attack_detection_method") and cef_message["attack_detection_method"] == "TPS Increased"
 
-
-          cef_message["attack_detection_matrix"] = "TPS"
           cef_message["attack_name"] = "HTTP Flood"
 
 
         elsif cef_message.has_key?("attack_detection_method") and cef_message["attack_detection_method"] == "Latency Increased"
 
-          cef_message["attack_detection_matrix"] = "Latency"
           cef_message["attack_name"] = "HTTP Server Response Latency"
 
         end
@@ -662,10 +660,10 @@ class BBNCef
               "device_utc_offset" => event["utc_offset"],
               "attack_status" => "",
               "attack_detection_rate" => 0,
-              "attack_detection_matrix" => "",
+              "attack_detection_matrix" => "TPS",
               "attack_detection_method" => "",
               "attack_drop_rate" => 0,
-              "attack_drop_matrix" => "",
+              "attack_drop_matrix" => "TPS",
               "attack_mitigation_method" => "",
               "attack_mitigation_action" => "",
               "attack_request_resource" => "",
@@ -754,10 +752,10 @@ class BBNCef
               "device_utc_offset" => event["utc_offset"],
               "attack_status" => "",
               "attack_detection_rate" => 0,
-              "attack_detection_matrix" => "",
+              "attack_detection_matrix" => "TPS",
               "attack_detection_method" => "",
               "attack_drop_rate" => 0,
-              "attack_drop_matrix" => "",
+              "attack_drop_matrix" => "TPS",
               "attack_mitigation_method" => "",
               "attack_mitigation_action" => "",
               "attack_request_resource" => "",
