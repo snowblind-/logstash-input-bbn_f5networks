@@ -374,23 +374,9 @@ class BBNCef
 
             if key == "device_time" and value != nil then sample_hash["device_time"] = value
 
-            #elsif key == "device_module" and value != nil then sample_hash["device_module"] = value
-
-            #elsif key == "device_version" and value != nil then sample_hash["device_version"] = value
-
-            #elsif key == "device_hostname" and value != nil then sample_hash["device_hostname"] = value
-
-            #elsif key == "device_ip" and value != nil then sample_hash["device_ip"] = value
-
             elsif key == "device_time" and value != nil then sample_hash["device_time"] = value
 
             elsif key == "virtual_context" and value != "" then sample_hash["virtual_context"] = value
-
-            #elsif key == "virtual_routing_table" and value != nil then sample_hash["virtual_routing_table"] = value
-
-            #elsif key == "administration_partition" and value != nil then sample_hash["administration_partition"] = value
-
-            #elsif key == "flow_table_id" and value != nil then sample_hash["flow_table_id"] = value
 
             elsif key == "attack_name" and value != nil then sample_hash["attack_name"] = value
 

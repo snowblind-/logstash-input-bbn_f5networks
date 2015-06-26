@@ -28,10 +28,8 @@ class BBNSyslog
 
     if (entry[0].delete! '["') == "dos_attack_event" and (entry[1].delete! '"]') != nil
 
-        # Attack Statistic for Ongoing Attack
       if entry[1] == "Attack Sampled"
 
-        # Define sample_hash and fill the obvious ans set defaults
         sample_hash = {
             "customer_id" => 0,
             "attack_id" => 0,
@@ -58,9 +56,6 @@ class BBNSyslog
             "remote_log_format" => "Syslog",
             "remote_log_payload" => message
         }
-
-        record = nil
-        entry = nil
 
         message.scan(/[a-zA-Z0-9_]+[=]+[a-zA-Z0-9:_\/\.\-\s]*(?=\s[a-zA-Z0-9_]+[=]|\])/) do |record|
 
@@ -92,7 +87,7 @@ class BBNSyslog
 
           elsif entry[0] == "date_time" and entry[1] != nil then sample_hash["device_time"] = entry[1]
 
-          elsif entry[0] == "context_name" and entry[1] != nil then sample_hash["virtual_context"] = entry[1]
+          elsif entry[0] == "context_name" and entry[1] != "" then sample_hash["virtual_context"] = entry[1]
 
           elsif entry[0] == "errdefs_msg_name" and entry[1] != nil then sample_hash["attack_category"] = entry[1]
 
@@ -106,60 +101,55 @@ class BBNSyslog
 
         end
 
-        if sample_hash["attack_category"] == "DNS Event" and sample_hash["attack_dns_query_type"] != ""
+        if sample_hash.has_key?("virtual_context") and sample_hash["virtual_context"] != ""
 
-          if sample_hash["virtual_context"] != ""
+          sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
 
-            sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
+          if sample_hash["attack_category"] == "DNS Event"
+
+            sample_hash["attack_detection_matrix"] = "QPS"
+            sample_hash["attack_drop_matrix"] = "QPS"
+
+          end
+
+          sample_hash.delete("virtual_context")
+
+        else
+
+          if sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
+
+            sample_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
+
+          elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
+
+            sample_hash["attack_mitigation_method"] = "Device-Wide Detection"
+
+          elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Flood attack"
+
+            sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+          elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Flood attack"
+
+            sample_hash["attack_mitigation_method"] = "Source-IP Detection"
+
+          elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Sweep attack"
+
+            sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
+
+          elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Sweep attack"
+
+            sample_hash["attack_mitigation_method"] = "Source-IP Detection"
 
           end
 
         end
 
-        if sample_hash["attack_name"] == "" and sample_hash["attack_status"] == "TCP Syncookie"
-
-          sample_hash["attack_name"] = "TCP SYN flood"
-
-          sample_hash["attack_status"] = sample_hash["attack_mitigation_action"]
-
-          sample_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
-
-          sample_hash["attack_mitigation_method"] = "Virtual Server SYN Cookie"
-
+        if sample_hash.has_key?("attack_name")
+          sample_hash.delete("attack_name")
         end
 
-        if sample_hash["attack_category"] == "Traffic Statistics"
-
-          sample_hash["attack_name"] = sample_hash["attack_category"]
-
-          sample_hash["attack_category"] = "Network DoS Event"
-
-        end
-
-        if sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
-
-          sample_hash["attack_mitigation_method"] = "Device-Wide Rate Limiting"
-
-        elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_category"] != "DNS Event" and sample_hash["attack_name"] != "Flood attack" and sample_hash["attack_name"] != "Sweep attack"
-
-          sample_hash["attack_mitigation_method"] = "Device-Wide Detection"
-
-        elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Flood attack"
-
-          sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
-
-        elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Flood attack"
-
-          sample_hash["attack_mitigation_method"] = "Source-IP Detection"
-
-        elsif sample_hash["attack_mitigation_action"] == "Drop" and sample_hash["attack_name"] == "Sweep attack"
-
-          sample_hash["attack_mitigation_method"] = "Source-IP Rate Limiting"
-
-        elsif sample_hash["attack_mitigation_action"] == "Allow" and sample_hash["attack_name"] == "Sweep attack"
-
-          sample_hash["attack_mitigation_method"] = "Source-IP Detection"
-
+        if sample_hash.has_key?("attack_category")
+          sample_hash.delete("attack_category")
         end
 
         @response["sample_hash"] = sample_hash
@@ -222,7 +212,7 @@ class BBNSyslog
 
           elsif entry[0] == "partition_name" and entry[1] != nil then start_hash["administration_partition"] = entry[1]
 
-          elsif entry[0] == "flow_id" and entry[1] != nil then start_hash["flow_table_id"] = entry[1]
+          elsif entry[0] == "flow_id" and entry[1] != "0000000000000000" then start_hash["flow_table_id"] = entry[1]
 
           elsif entry[0] == "dos_attack_name" and entry[1] != nil then start_hash["attack_name"] = entry[1]
 
