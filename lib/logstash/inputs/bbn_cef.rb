@@ -827,7 +827,67 @@ class BBNCef
 
         elsif cef_message["attack_status"] == "Mitigation changed"
 
-          puts message
+          changed_hash = {
+              "customer_id" => 0,
+              "device_time" => "",
+              "device_utc_offset" => event["utc_offset"],
+              "attack_id" => 0,
+              "attack_type" => 1,
+              "attack_severity" => 0,
+              "attack_status" => "",
+              "attack_detection_rate" => 0,
+              "attack_detection_matrix" => "TPS",
+              "attack_detection_method" => "",
+              "attack_drop_rate" => 0,
+              "attack_drop_matrix" => "TPS",
+              "attack_mitigation_method" => "",
+              "attack_mitigation_action" => "",
+              "attack_request_resource" => "",
+              "attack_source_ip" => "",
+              "record_type" => "attack_mitigation_stats",
+              "remote_log_format" => "CEF",
+              "remote_log_payload" => message
+          }
+
+          # Construct the start_hash and sample_hash all in one
+          cef_message.each do |key,value|
+
+            if key == "attack_id" and value != nil then changed_hash["attack_id"] = value
+
+            elsif key == "device_time" and value != nil then changed_hash["device_time"] = value
+
+            elsif key == "attack_status" and value != nil then changed_hash["attack_status"] = value
+
+            elsif key == "attack_severity" and value != nil then changed_hash["attack_severity"] = value.to_i
+
+            elsif key == "attack_detection_rate" and value != nil then changed_hash["attack_detection_rate"] = value.to_i
+
+            elsif key == "attack_detection_matrix" and value != nil then changed_hash["attack_detection_matrix"] = value
+
+            elsif key == "attack_detection_method" and value != nil then changed_hash["attack_detection_method"] = value
+
+            elsif key == "attack_drop_rate" and value != nil then changed_hash["attack_drop_rate"] = value.to_i
+
+            elsif key == "attack_mitigation_method" and value != nil then changed_hash["attack_mitigation_method"] = value
+
+            elsif key == "attack_mitigation_action" and value != nil then changed_hash["attack_mitigation_action"] = value
+
+            elsif key == "attack_request_resource" and value != nil then changed_hash["attack_request_resource"] = value
+
+            elsif key == "attack_source_ip" and value != nil then changed_hash["attack_source_ip"] = value
+
+            end
+
+          end
+
+          if changed_hash["device_time"] != ""
+
+            changed_hash["device_time"] = BBNCommon.to_utc(changed_hash["device_time"], event["utc_offset"])
+            changed_hash["attack_start_date"] = changed_hash["device_time"]
+
+          end
+
+          @response["changed_hash"] = changed_hash
 
         elsif cef_message["attack_status"] == "Attack ended"
 
