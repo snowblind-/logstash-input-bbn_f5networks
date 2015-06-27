@@ -6,7 +6,7 @@ class BBNCef
     cef_message = Hash.new()
     cef_dynamic_message = Hash.new()
 
-    client = Elasticsearch::Client.new
+    esc = Elasticsearch::Client.new
 
     message = event["message"]
 
@@ -23,6 +23,14 @@ class BBNCef
         cef_message["attack_name"] = spl_cef[5]
 
       elsif cef_message["device_module"] == "ASM"
+
+        if spl_cef[4] != "DOS L7 attack"
+
+          BBNCommon.logger("INFO", "parse_cef:validate", "Received a CEF message with unsupported attack type: #{spl_cef[4]} from host#{event[host]}")
+
+          return @response
+
+        end
 
         cef_message["attack_name"] = spl_cef[4]
         cef_message["attack_mitigation_method"] = spl_cef[5]
@@ -537,7 +545,7 @@ class BBNCef
 
             begin
 
-              rsp = client.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: stopped_hash["attack_id"] } } }
+              rsp = esc.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: stopped_hash["attack_id"] } } }
 
               #rescue => e
 
@@ -553,7 +561,7 @@ class BBNCef
 
                   begin
 
-                    client.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
+                    esc.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
                                   body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_time"] } }
 
                     #rescue => e
@@ -917,7 +925,7 @@ class BBNCef
 
             begin
 
-              rsp = client.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: stopped_hash["attack_id"] } } }
+              rsp = esc.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: stopped_hash["attack_id"] } } }
 
               #rescue => e
 
@@ -933,7 +941,7 @@ class BBNCef
 
                   begin
 
-                    client.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
+                    esc.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
                                   body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_time"] } }
 
                     #rescue => e
