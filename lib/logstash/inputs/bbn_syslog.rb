@@ -18,7 +18,7 @@ class BBNSyslog
   def self.parse_syslog(event)
 
     @response = Hash.new()
-    client = Elasticsearch::Client.new
+    esc = Elasticsearch::Client.new
 
     message = event["message"]
     message.delete! '"'
@@ -272,7 +272,7 @@ class BBNSyslog
 
           begin
 
-            rsp = client.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: stopped_hash["attack_id"] } } }
+            rsp = esc.search index: "bbn", type: "attacks", body: { query: { match: { attack_id: stopped_hash["attack_id"] } } }
 
             #rescue => e
 
@@ -288,7 +288,7 @@ class BBNSyslog
 
                 begin
 
-                  client.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
+                  esc.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
                                 body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_time"] } }
 
                   #rescue => e
