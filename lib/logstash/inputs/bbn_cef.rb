@@ -12,22 +12,23 @@ class BBNCef
 
     spl_cef = message.split("|")
 
-    cef_message["device_vendor"] = spl_cef[1]
-    cef_message["device_module"] = spl_cef[2]
-    cef_message["device_version"] = spl_cef[3]
-
-    if cef_message["device_module"] == "Advanced Firewall Module"
-
-      cef_message["attack_name"] = spl_cef[5]
-
-    elsif cef_message["device_module"] == "ASM"
-
-      cef_message["attack_name"] = spl_cef[4]
-      cef_message["attack_mitigation_method"] = spl_cef[5]
-
-    end
-
     if spl_cef.count == 8
+
+      cef_message["device_vendor"] = spl_cef[1]
+      cef_message["device_module"] = spl_cef[2]
+      cef_message["device_version"] = spl_cef[3]
+
+      if cef_message["device_module"] == "Advanced Firewall Module"
+
+        cef_message["attack_name"] = spl_cef[5]
+
+      elsif cef_message["device_module"] == "ASM"
+
+        cef_message["attack_name"] = spl_cef[4]
+        cef_message["attack_mitigation_method"] = spl_cef[5]
+        cef_message["attack_severity"] = spl_cef[6]
+
+      end
 
       cef_data = spl_cef[7]
 
@@ -345,10 +346,11 @@ class BBNCef
 
           sample_hash = {
               "customer_id" => 0,
-              "attack_id" => 0,
-              "attack_type" => 1,
               "device_time" => "",
               "device_utc_offset" => event["utc_offset"],
+              "attack_id" => 0,
+              "attack_type" => 1,
+              "attack_severity" => 0,
               "attack_status" => "",
               "attack_detection_rate" => 0,
               "attack_detection_matrix" => "PPS",
@@ -666,11 +668,12 @@ class BBNCef
 
           sample_hash = {
               "customer_id" => 0,
-              "attack_id" => 0,
-              "attack_type" => 1,
               "device_time" => "",
               "device_utc_offset" => event["utc_offset"],
+              "attack_id" => 0,
+              "attack_type" => 1,
               "attack_status" => "",
+              "attack_severity" => 0,
               "attack_detection_rate" => 0,
               "attack_detection_matrix" => "TPS",
               "attack_detection_method" => "",
@@ -709,6 +712,10 @@ class BBNCef
             elsif key == "attack_status" and value != nil then start_hash["attack_status"] = value
 
             elsif key == "attack_category" and value != nil then start_hash["attack_category"] = value
+
+            elsif key == "attack_severity" and value != nil then start_hash["attack_severity"] = value
+
+            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value
 
             elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value.to_i
 
@@ -758,10 +765,11 @@ class BBNCef
 
           sample_hash = {
               "customer_id" => 0,
-              "attack_id" => 0,
-              "attack_type" => 1,
               "device_time" => "",
               "device_utc_offset" => event["utc_offset"],
+              "attack_id" => 0,
+              "attack_type" => 1,
+              "attack_severity" => 0,
               "attack_status" => "",
               "attack_detection_rate" => 0,
               "attack_detection_matrix" => "TPS",
@@ -785,6 +793,8 @@ class BBNCef
             elsif key == "device_time" and value != nil then sample_hash["device_time"] = value
 
             elsif key == "attack_status" and value != nil then sample_hash["attack_status"] = value
+
+            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value
 
             elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value.to_i
 
