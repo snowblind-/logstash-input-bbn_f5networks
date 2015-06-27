@@ -315,7 +315,7 @@ class BBNCef
 
             elsif key == "attack_status" and value != nil then start_hash["attack_status"] = value
 
-            elsif key == "attack_severity" and value != nil then start_hash["attack_severity"] = value
+            elsif key == "attack_severity" and value != nil then start_hash["attack_severity"] = value.to_i
 
             elsif key == "attack_category" and value != nil then start_hash["attack_category"] = value
 
@@ -386,7 +386,7 @@ class BBNCef
 
             elsif key == "attack_status" and value != nil then sample_hash["attack_status"] = value
 
-            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value
+            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value.to_i
 
             elsif key == "attack_category" and value != nil then sample_hash["attack_category"] = value
 
@@ -713,9 +713,9 @@ class BBNCef
 
             elsif key == "attack_category" and value != nil then start_hash["attack_category"] = value
 
-            elsif key == "attack_severity" and value != nil then start_hash["attack_severity"] = value
+            elsif key == "attack_severity" and value != nil then start_hash["attack_severity"] = value.to_i
 
-            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value
+            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value.to_i
 
             elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value.to_i
 
@@ -794,7 +794,7 @@ class BBNCef
 
             elsif key == "attack_status" and value != nil then sample_hash["attack_status"] = value
 
-            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value
+            elsif key == "attack_severity" and value != nil then sample_hash["attack_severity"] = value.to_i
 
             elsif key == "attack_detection_rate" and value != nil then sample_hash["attack_detection_rate"] = value.to_i
 
