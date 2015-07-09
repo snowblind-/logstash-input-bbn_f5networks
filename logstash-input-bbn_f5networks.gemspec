@@ -20,8 +20,8 @@ Gem::Specification.new do |s|
   s.summary = "Logstash plugin used to receive and parse DDoS event from F5 BIG-IP over Syslog and CEF"
   s.description = " N/A "
   s.authors = ["Baffin Bay Networks"]
-  s.email = 'devops-github@buffinbaynetworks.com'
-  s.homepage = "http://www.buffinbaynetworks.com"
+  s.email = 'devops-github@baffinbaynetworks.com'
+  s.homepage = "http://www.baffinbaynetworks.com"
   s.require_paths = ["lib"]
 
   # Files
