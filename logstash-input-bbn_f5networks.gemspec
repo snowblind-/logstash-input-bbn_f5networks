@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.version = '0.2.1'
   s.licenses = ['Apache License (2.0)']
   s.summary = "Logstash plugin used to receive and parse DDoS event from F5 BIG-IP over Syslog and CEF"
-  s.description = " N/A "
+  s.description = "This gem is a logstash plugin required to be installed on top of the Logstash core pipeline using $LS_HOME/bin/plugin install gemname. This gem is not a stand-alone program"
   s.authors = ["Baffin Bay Networks"]
   s.email = 'devops-github@baffinbaynetworks.com'
   s.homepage = "http://www.baffinbaynetworks.com"
