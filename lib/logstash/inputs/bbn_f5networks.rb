@@ -23,9 +23,9 @@ require "logstash/filters/date"
 require "elasticsearch"
 
 # BBN dependencies
-require "logstash/inputs/bbn_syslog"
-require "logstash/inputs/bbn_cef"
-require "logstash/inputs/bbn_common"
+require "logstash/inputs/modules/bbn_syslog"
+require "logstash/inputs/modules/bbn_cef"
+require "logstash/inputs/modules/bbn_common"
 
 # Other dependencies
 require "socket"

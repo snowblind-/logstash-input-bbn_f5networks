@@ -15,7 +15,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'logstash-input-bbn_f5networks'
-  s.version = '0.2.0'
+  s.version = '0.2.1'
   s.licenses = ['Apache License (2.0)']
   s.summary = "Logstash plugin used to receive and parse DDoS event from F5 BIG-IP over Syslog and CEF"
   s.description = " N/A "
