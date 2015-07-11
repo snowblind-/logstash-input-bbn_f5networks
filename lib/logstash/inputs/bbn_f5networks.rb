@@ -31,7 +31,6 @@ require "logstash/inputs/modules/bbn_common"
 require "socket"
 require "date"
 require "concurrent_ruby"
-require "json"
 require "logger"
 require "hashie"
 
