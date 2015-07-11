@@ -15,9 +15,9 @@
 
 Gem::Specification.new do |s|
   s.name = 'logstash-input-bbn_f5networks'
-  s.version = '0.2.1'
+  s.version = '0.2.2'
   s.licenses = ['Apache License (2.0)']
-  s.summary = "Logstash plugin used to receive and parse DDoS event from F5 BIG-IP over Syslog and CEF"
+  s.summary = "Logstash plugin used to receive and parse DDoS event from F5 BIG-IP via Syslog and CEF"
   s.description = "This gem is a logstash plugin required to be installed on top of the Logstash core pipeline using $LS_HOME/bin/plugin install gemname. This gem is not a stand-alone program"
   s.authors = ["Baffin Bay Networks"]
   s.email = 'devops-github@baffinbaynetworks.com'
@@ -35,6 +35,5 @@ Gem::Specification.new do |s|
   # Gem dependencies
   s.add_runtime_dependency "logstash-core", '>= 1.5.0', '< 2.0.0'
   s.add_runtime_dependency 'logstash-codec-plain'
-  s.add_runtime_dependency 'stud'
   s.add_development_dependency 'logstash-devutils'
 end
