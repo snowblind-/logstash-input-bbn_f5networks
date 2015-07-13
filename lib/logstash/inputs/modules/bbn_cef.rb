@@ -73,7 +73,7 @@ class BBNCef
 
         elsif cef_entry[0] == "dvc" and cef_entry[1] != nil then cef_message["device_ip"] = cef_entry[1]
 
-        elsif cef_entry[0] == "rt" and cef_entry[1] != nil then cef_message["device_time"] = cef_entry[1]
+        elsif cef_entry[0] == "rt" and cef_entry[1] != nil then cef_message["device_utc_time"] = cef_entry[1]
 
         elsif cef_entry[0] == "F5RouteDomain" and cef_entry[1] != nil then cef_message["virtual_routing_table"] = cef_entry[1]
 
@@ -104,7 +104,7 @@ class BBNCef
 
         elsif cef_entry[0] == "dvc" and cef_entry[1] != nil then cef_message["device_ip"] = cef_entry[1]
 
-        elsif cef_entry[0] == "rt" and cef_entry[1] != nil then cef_message["device_time"] = cef_entry[1]
+        elsif cef_entry[0] == "rt" and cef_entry[1] != nil then cef_message["device_utc_time"] = cef_entry[1]
 
         elsif cef_entry[0] == "act" and cef_entry[1] != nil then cef_message["attack_mitigation_action"] = cef_entry[1]
 
@@ -288,7 +288,7 @@ class BBNCef
               "device_version" => "",
               "device_hostname" => "",
               "device_ip" => "",
-              "device_time" => "",
+              "device_utc_time" => "",
               "device_utc_offset" => event["utc_offset"],
               "virtual_context" => "",
               "virtual_routing_table" => "",
@@ -322,7 +322,7 @@ class BBNCef
 
             elsif key == "device_ip" and value != nil then start_hash["device_ip"] = value
 
-            elsif key == "device_time" and value != nil then start_hash["device_time"] = value
+            elsif key == "device_utc_time" and value != nil then start_hash["device_utc_time"] = value
 
             elsif key == "virtual_context" and value != "" then start_hash["virtual_context"] = value
 
@@ -346,10 +346,10 @@ class BBNCef
 
           end
 
-          if start_hash["device_time"] != ""
+          if start_hash["device_utc_time"] != ""
 
-            start_hash["device_time"] = BBNCommon.to_utc(start_hash["device_time"], event["utc_offset"])
-            start_hash["attack_start_date"] = start_hash["device_time"]
+            start_hash["device_utc_time"] = BBNCommon.to_utc(start_hash["device_utc_time"], event["utc_offset"])
+            start_hash["attack_start_date"] = start_hash["device_utc_time"]
 
           end
 
@@ -369,7 +369,7 @@ class BBNCef
 
           sample_hash = {
               "customer_id" => 0,
-              "device_time" => "",
+              "device_utc_time" => "",
               "device_utc_offset" => event["utc_offset"],
               "attack_id" => 0,
               "attack_type" => 1,
@@ -397,9 +397,9 @@ class BBNCef
 
           cef_message.each do |key,value|
 
-            if key == "device_time" and value != nil then sample_hash["device_time"] = value
+            if key == "device_utc_time" and value != nil then sample_hash["device_utc_time"] = value
 
-            elsif key == "device_time" and value != nil then sample_hash["device_time"] = value
+            elsif key == "device_utc_time" and value != nil then sample_hash["device_utc_time"] = value
 
             elsif key == "virtual_context" and value != "" then sample_hash["virtual_context"] = value
 
@@ -447,9 +447,9 @@ class BBNCef
 
           end
 
-          if sample_hash["device_time"] != ""
+          if sample_hash["device_utc_time"] != ""
 
-            sample_hash["device_time"] = BBNCommon.to_utc(sample_hash["device_time"], event["utc_offset"])
+            sample_hash["device_utc_time"] = BBNCommon.to_utc(sample_hash["device_utc_time"], event["utc_offset"])
 
           end
 
@@ -531,7 +531,7 @@ class BBNCef
 
           stopped_hash = {
               "customer_id" => 0,
-              "device_time" => "",
+              "device_utc_time" => "",
               "attack_id" => 0
           }
 
@@ -542,7 +542,7 @@ class BBNCef
 
             entry = record.split("=")
 
-            if entry[0] == "date_time" and entry[1] != nil then stopped_hash["device_time"] = entry[1]
+            if entry[0] == "date_time" and entry[1] != nil then stopped_hash["device_utc_time"] = entry[1]
 
             elsif entry[0] == "dos_attack_id" and entry[1] != nil then stopped_hash["attack_id"] = entry[1]
 
@@ -550,9 +550,9 @@ class BBNCef
 
           end
 
-          if stopped_hash["device_time"] != ""
+          if stopped_hash["device_utc_time"] != ""
 
-            stopped_hash["device_time"] = BBNCommon.to_utc(stopped_hash["device_time"], event["utc_offset"])
+            stopped_hash["device_utc_time"] = BBNCommon.to_utc(stopped_hash["device_utc_time"], event["utc_offset"])
 
           end
 
@@ -577,7 +577,7 @@ class BBNCef
                   begin
 
                     esc.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
-                                  body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_time"] } }
+                                  body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_utc_time"] } }
 
                     #rescue => e
 
@@ -668,7 +668,7 @@ class BBNCef
               "device_version" => "",
               "device_hostname" => "",
               "device_ip" => "",
-              "device_time" => "",
+              "device_utc_time" => "",
               "device_utc_offset" => event["utc_offset"],
               "virtual_context" => "",
               "virtual_routing_table" => "",
@@ -691,7 +691,7 @@ class BBNCef
 
           sample_hash = {
               "customer_id" => 0,
-              "device_time" => "",
+              "device_utc_time" => "",
               "device_utc_offset" => event["utc_offset"],
               "attack_id" => 0,
               "attack_type" => 1,
@@ -724,7 +724,7 @@ class BBNCef
 
             elsif key == "device_ip" and value != nil then start_hash["device_ip"] = value
 
-            elsif key == "device_time" and value != nil then start_hash["device_time"] = value
+            elsif key == "device_utc_time" and value != nil then start_hash["device_utc_time"] = value
 
             elsif key == "virtual_context" and value != "" then start_hash["virtual_context"] = value
 
@@ -760,12 +760,12 @@ class BBNCef
 
           end
 
-          if start_hash["device_time"] != ""
+          if start_hash["device_utc_time"] != ""
 
-            start_hash["device_time"] = BBNCommon.to_utc(start_hash["device_time"], event["utc_offset"])
-            start_hash["attack_start_date"] = start_hash["device_time"]
+            start_hash["device_utc_time"] = BBNCommon.to_utc(start_hash["device_utc_time"], event["utc_offset"])
+            start_hash["attack_start_date"] = start_hash["device_utc_time"]
 
-            sample_hash["device_time"] = start_hash["device_time"]
+            sample_hash["device_utc_time"] = start_hash["device_utc_time"]
 
           end
 
@@ -788,7 +788,7 @@ class BBNCef
 
           sample_hash = {
               "customer_id" => 0,
-              "device_time" => "",
+              "device_utc_time" => "",
               "device_utc_offset" => event["utc_offset"],
               "attack_id" => 0,
               "attack_type" => 1,
@@ -813,7 +813,7 @@ class BBNCef
 
             if key == "attack_id" and value != nil then sample_hash["attack_id"] = value
 
-            elsif key == "device_time" and value != nil then sample_hash["device_time"] = value
+            elsif key == "device_utc_time" and value != nil then sample_hash["device_utc_time"] = value
 
             elsif key == "attack_status" and value != nil then sample_hash["attack_status"] = value
 
@@ -839,10 +839,10 @@ class BBNCef
 
           end
 
-          if sample_hash["device_time"] != ""
+          if sample_hash["device_utc_time"] != ""
 
-            sample_hash["device_time"] = BBNCommon.to_utc(sample_hash["device_time"], event["utc_offset"])
-            sample_hash["attack_start_date"] = sample_hash["device_time"]
+            sample_hash["device_utc_time"] = BBNCommon.to_utc(sample_hash["device_utc_time"], event["utc_offset"])
+            sample_hash["attack_start_date"] = sample_hash["device_utc_time"]
 
           end
 
@@ -852,7 +852,7 @@ class BBNCef
 
           changed_hash = {
               "customer_id" => 0,
-              "device_time" => "",
+              "device_utc_time" => "",
               "device_utc_offset" => event["utc_offset"],
               "attack_id" => 0,
               "attack_type" => 1,
@@ -877,7 +877,7 @@ class BBNCef
 
             if key == "attack_id" and value != nil then changed_hash["attack_id"] = value
 
-            elsif key == "device_time" and value != nil then changed_hash["device_time"] = value
+            elsif key == "device_utc_time" and value != nil then changed_hash["device_utc_time"] = value
 
             elsif key == "attack_status" and value != nil then changed_hash["attack_status"] = value
 
@@ -903,10 +903,10 @@ class BBNCef
 
           end
 
-          if changed_hash["device_time"] != ""
+          if changed_hash["device_utc_time"] != ""
 
-            changed_hash["device_time"] = BBNCommon.to_utc(changed_hash["device_time"], event["utc_offset"])
-            changed_hash["attack_start_date"] = changed_hash["device_time"]
+            changed_hash["device_utc_time"] = BBNCommon.to_utc(changed_hash["device_utc_time"], event["utc_offset"])
+            changed_hash["attack_start_date"] = changed_hash["device_utc_time"]
 
           end
 
@@ -916,7 +916,7 @@ class BBNCef
 
           stopped_hash = {
               "customer_id" => 0,
-              "device_time" => "",
+              "device_utc_time" => "",
               "attack_id" => 0
           }
 
@@ -924,15 +924,15 @@ class BBNCef
 
             if key == "attack_id" and value != nil then stopped_hash["attack_id"] = value
 
-            elsif key == "device_time" and value != nil then stopped_hash["device_time"] = value
+            elsif key == "device_utc_time" and value != nil then stopped_hash["device_utc_time"] = value
 
             end
 
           end
 
-          if stopped_hash["device_time"] != ""
+          if stopped_hash["device_utc_time"] != ""
 
-            stopped_hash["device_time"] = BBNCommon.to_utc(stopped_hash["device_time"], event["utc_offset"])
+            stopped_hash["device_utc_time"] = BBNCommon.to_utc(stopped_hash["device_utc_time"], event["utc_offset"])
 
           end
 
@@ -957,7 +957,7 @@ class BBNCef
                   begin
 
                     esc.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
-                                  body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_time"] } }
+                                  body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_utc_time"] } }
 
                     #rescue => e
 

@@ -34,7 +34,7 @@ class BBNSyslog
             "customer_id" => 0,
             "attack_id" => 0,
             "attack_type" => 1,
-            "device_time" => "",
+            "device_utc_time" => "",
             "device_utc_offset" => event["utc_offset"],
             "attack_status" => "",
             "attack_detection_rate" => 0,
@@ -85,7 +85,7 @@ class BBNSyslog
 
           elsif entry[0] == "vlan" and entry[1] != nil then sample_hash["attack_destination_vlan"] = entry[1]
 
-          elsif entry[0] == "date_time" and entry[1] != nil then sample_hash["device_time"] = entry[1]
+          elsif entry[0] == "date_time" and entry[1] != nil then sample_hash["device_utc_time"] = entry[1]
 
           elsif entry[0] == "context_name" and entry[1] != "" then sample_hash["virtual_context"] = entry[1]
 
@@ -95,9 +95,9 @@ class BBNSyslog
 
         end
 
-        if sample_hash["device_time"] != ""
+        if sample_hash["device_utc_time"] != ""
 
-          sample_hash["device_time"] = BBNCommon.to_utc(sample_hash["device_time"], event["utc_offset"])
+          sample_hash["device_utc_time"] = BBNCommon.to_utc(sample_hash["device_utc_time"], event["utc_offset"])
 
         end
 
@@ -165,7 +165,7 @@ class BBNSyslog
             "device_version" => "",
             "device_hostname" => "",
             "device_ip" => "",
-            "device_time" => "",
+            "device_utc_time" => "",
             "device_utc_offset" => event["utc_offset"],
             "virtual_context" => "",
             "virtual_routing_table" => "",
@@ -204,7 +204,7 @@ class BBNSyslog
 
           elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then start_hash["device_ip"] = entry[1]
 
-          elsif entry[0] == "date_time" and entry[1] != nil then start_hash["device_time"] = entry[1]
+          elsif entry[0] == "date_time" and entry[1] != nil then start_hash["device_utc_time"] = entry[1]
 
           elsif entry[0] == "context_name" and entry[1] != nil then start_hash["virtual_context"] = entry[1]
 
@@ -228,13 +228,13 @@ class BBNSyslog
 
         end
 
-        if start_hash["device_time"] != ""
+        if start_hash["device_utc_time"] != ""
 
-          start_hash["device_time"] = BBNCommon.to_utc(start_hash["device_time"], event["utc_offset"])
+          start_hash["device_utc_time"] = BBNCommon.to_utc(start_hash["device_utc_time"], event["utc_offset"])
 
         end
 
-        start_hash["attack_start_date"] = start_hash["device_time"]
+        start_hash["attack_start_date"] = start_hash["device_utc_time"]
 
         @response["start_hash"] = start_hash
 
@@ -243,7 +243,7 @@ class BBNSyslog
 
         stopped_hash = {
             "customer_id" => 0,
-            "device_time" => "",
+            "device_utc_time" => "",
             "attack_id" => 0
         }
 
@@ -254,7 +254,7 @@ class BBNSyslog
 
           entry = record.split("=")
 
-          if entry[0] == "date_time" and entry[1] != nil then stopped_hash["device_time"] = entry[1]
+          if entry[0] == "date_time" and entry[1] != nil then stopped_hash["device_utc_time"] = entry[1]
 
           elsif entry[0] == "dos_attack_id" and entry[1] != nil then stopped_hash["attack_id"] = entry[1]
 
@@ -262,9 +262,9 @@ class BBNSyslog
 
         end
 
-        if stopped_hash["device_time"] != ""
+        if stopped_hash["device_utc_time"] != ""
 
-          stopped_hash["device_time"] = BBNCommon.to_utc(stopped_hash["device_time"], event["utc_offset"])
+          stopped_hash["device_utc_time"] = BBNCommon.to_utc(stopped_hash["device_utc_time"], event["utc_offset"])
 
         end
 
@@ -289,7 +289,7 @@ class BBNSyslog
                 begin
 
                   esc.update index: "bbn", type: "attacks", id: mash.hits.hits.first._id, refresh: 1,
-                                body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_time"] } }
+                                body: { doc: { attack_ongoing: 0, attack_end_date: stopped_hash["device_utc_time"] } }
 
                   #rescue => e
 
@@ -335,7 +335,7 @@ class BBNSyslog
             "device_version" => "",
             "device_hostname" => "",
             "device_ip" => "",
-            "device_time" => "",
+            "device_utc_time" => "",
             "device_utc_offset" => event["utc_offset"],
             "policy_name" => "",
             "virtual_context" => "",
@@ -372,7 +372,7 @@ class BBNSyslog
 
           elsif entry[0] == "bigip_mgmt_ip" and entry[1] != nil then syncookie_hash["device_ip"] = entry[1]
 
-          elsif entry[0] == "date_time" and entry[1] != nil then syncookie_hash["device_time"] = entry[1]
+          elsif entry[0] == "date_time" and entry[1] != nil then syncookie_hash["device_utc_time"] = entry[1]
 
           elsif entry[0] == "action" and entry[1] != nil then syncookie_hash["attack_mitigation_action"] = entry[1]
 
@@ -399,14 +399,14 @@ class BBNSyslog
         syncookie_hash["attack_mitigation_action"] = "Cryptographic SYN Cookie"
         syncookie_hash["attack_mitigation_method"] = "Per Virtual Server SYN Cookie"
 
-        if syncookie_hash["device_time"] != ""
+        if syncookie_hash["device_utc_time"] != ""
 
-          syncookie_hash["device_time"] = BBNCommon.to_utc(syncookie_hash["device_time"], event["utc_offset"])
+          syncookie_hash["device_utc_time"] = BBNCommon.to_utc(syncookie_hash["device_utc_time"], event["utc_offset"])
 
         end
 
-        syncookie_hash["attack_start_date"] = syncookie_hash["device_time"]
-        syncookie_hash["attack_end_date"] = syncookie_hash["device_time"]
+        syncookie_hash["attack_start_date"] = syncookie_hash["device_utc_time"]
+        syncookie_hash["attack_end_date"] = syncookie_hash["device_utc_time"]
 
         @response["syncookie_hash"] = syncookie_hash
 
@@ -440,7 +440,7 @@ class BBNSyslog
                 "device_hostname" => "",
                 "device_ip" => "",
                 "virtual_context" => "",
-                "device_time" => "",
+                "device_utc_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
@@ -467,7 +467,7 @@ class BBNSyslog
 
               elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
-              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_utc_time"] = entry[1]
 
               elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
 
@@ -491,7 +491,7 @@ class BBNSyslog
 
             end
 
-            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+            trafficstats_hash["device_utc_time"] = BBNCommon.to_utc(trafficstats_hash["device_utc_time"],event["utc_offset"])
 
             @response["trafficstats_hash"] = trafficstats_hash
 
@@ -504,7 +504,7 @@ class BBNSyslog
                 "device_hostname" => "",
                 "device_ip" => "",
                 "virtual_context" => "",
-                "device_time" => "",
+                "device_utc_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
@@ -528,7 +528,7 @@ class BBNSyslog
 
               elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
-              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_utc_time"] = entry[1]
 
               elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
 
@@ -546,7 +546,7 @@ class BBNSyslog
 
             end
 
-            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+            trafficstats_hash["device_utc_time"] = BBNCommon.to_utc(trafficstats_hash["device_utc_time"],event["utc_offset"])
 
             @response["trafficstats_hash"] = trafficstats_hash
 
@@ -559,7 +559,7 @@ class BBNSyslog
                 "device_hostname" => "",
                 "device_ip" => "",
                 "virtual_context" => "",
-                "device_time" => "",
+                "device_utc_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
@@ -583,7 +583,7 @@ class BBNSyslog
 
               elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
-              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_utc_time"] = entry[1]
 
               elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
 
@@ -601,7 +601,7 @@ class BBNSyslog
 
             end
 
-            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+            trafficstats_hash["device_utc_time"] = BBNCommon.to_utc(trafficstats_hash["device_utc_time"],event["utc_offset"])
 
             @response["trafficstats_hash"] = trafficstats_hash
 
@@ -614,7 +614,7 @@ class BBNSyslog
                 "device_hostname" => "",
                 "device_ip" => "",
                 "virtual_context" => "",
-                "device_time" => "",
+                "device_utc_time" => "",
                 "device_module" => "",
                 "device_vendor" => "",
                 "device_version" => "",
@@ -638,7 +638,7 @@ class BBNSyslog
 
               elsif entry[0] == "context_name" and entry[1] != nil then trafficstats_hash["virtual_context"] = entry[1]
 
-              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_time"] = entry[1]
+              elsif entry[0] == "date_time" and entry[1] != nil then trafficstats_hash["device_utc_time"] = entry[1]
 
               elsif entry[0] == "device_product" and entry[1] != nil then trafficstats_hash["device_module"] = entry[1]
 
@@ -656,7 +656,7 @@ class BBNSyslog
 
             end
 
-            trafficstats_hash["device_time"] = BBNCommon.to_utc(trafficstats_hash["device_time"],event["utc_offset"])
+            trafficstats_hash["device_utc_time"] = BBNCommon.to_utc(trafficstats_hash["device_utc_time"],event["utc_offset"])
 
             @response["trafficstats_hash"] = trafficstats_hash
 
