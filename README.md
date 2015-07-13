@@ -414,7 +414,9 @@ curl -XPUT "http://localhost:9200/bbn/_mapping/traffic_stats" -d '
 	}'
 
 
-To execute Logstash with the configuration run the following command
+## Run Logstash with your new plugin and insert the data to Elasticseach
+
+To execute Logstash with your newly added configuration run the following command
 
 <i>
   devops-github@devsrv10:~/logstash-input-bbn_f5networks$ sudo /opt/logstash/bin/logstash -f /etc/logstash/conf.d/bbn.conf<br>
