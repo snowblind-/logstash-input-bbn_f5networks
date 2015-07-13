@@ -1,8 +1,8 @@
 # logstash-input-bbn_f5networks
-Recives log messages from F5 BIG-IP over Syslog/CEF and parses them and output json blobs
+Logstash plugin used to receive and parse DDoS event from F5 BIG-IP via Syslog and CEF
 
 ## Installing a test system
-Easist way to test the plugin would be to install a Ubuntu server.
+Easiest way to test the plugin would be to install a Ubuntu server.
 
 ## Installing dependencies
 The following dependencies needs to be installed via apt-get
@@ -10,7 +10,7 @@ The following dependencies needs to be installed via apt-get
   sudo apt-get install git openjdk-7-jdk
 
 ## Install latest version of JRuby
-All plugin development for logstash is done with JRuby. Install the latest version of JRuby (currently 1.7.19), can be found here: https://s3.amazonaws.com/jruby.org/downloads/1.7.19/jruby-bin-1.7.19.tar.gz 
+All plugin development for Logstash is done with JRuby. Install the latest version of JRuby (currently 1.7.19), can be found here: https://s3.amazonaws.com/jruby.org/downloads/1.7.19/jruby-bin-1.7.19.tar.gz 
   
 Extract the file and put the entire directory in /usr/local/lib/.
 
@@ -26,9 +26,9 @@ Next step would be to add JRUBY_HOME and JRUBY_HOME/bin into your PATH environme
 
 Edit /etc/environment and add the following line to the top of the file <i>JRUBY_HOME="/usr/local/lib/jruby-1.7.19"</i>
 
-Then create a file called jrubyenvvar.sh in <i>/etc/profile.d/</i> and add the follwoing line <i>export PATH=$PATH:$JRUBY_HOME/bin</i>
+Then create a file called jrubyenvvar.sh in <i>/etc/profile.d/</i> and add the following line <i>export PATH=$PATH:$JRUBY_HOME/bin</i>
 
-After that restart your server. Once server comes back up verify the <i>PATH</i> changes by typing <i>export</i>. You should see the output containg the foloowing:
+After that restart your server. Once server comes back up verify the <i>PATH</i> changes by typing <i>export</i>. You should see the output containing the following:
 
 <i>
   devops-github@devsrv10:~$ export<br>
@@ -41,7 +41,7 @@ After that restart your server. Once server comes back up verify the <i>PATH</i>
 
 To be able to run the pre-compiled JRuby binaries in super-user mode you need to add them to the /usr/bin/ path manually (or any other secure_path on your system).
 
-Simpliest way would be to create a sym link to the original file from /usr/bin/
+Simplest way would be to create a sym link to the original file from /usr/bin/
 
 <i>
   devops-github@devsrv10:~$ sudo ln -s /usr/local/lib/jruby-1.7.19/bin/jruby /usr/bin/  <br>
@@ -56,7 +56,7 @@ At this point you should be able to execute the jruby binary directly from the c
   jruby 1.7.19 (1.9.3p551) 2015-01-29 20786bd on OpenJDK 64-Bit Server VM 1.7.0_75-b13 +jit [linux-amd64] <br>
 </i>
 
-Once you verified that <i>jruby, gem and jgem</i> runs without any errors you need to <i>install bundler and rspec via gem</i>. Run the follwoing commands to install the two packets.
+Once you verified that <i>jruby, gem and jgem</i> runs without any errors you need to <i>install bundler and rspec via gem</i>. Run the following commands to install the two packets.
 
 <i>
   devops-github@devsrv10:~$ sudo gem install bundler  <br>
@@ -64,12 +64,12 @@ Once you verified that <i>jruby, gem and jgem</i> runs without any errors you ne
 </i>
 
 ## Installing Logstash
-Then install >= logstash-1.5.0rc3. The plugin has been developed with this specific release of logstash.
+Then install >= logstash-1.5.0.
 
-The above logstash release can be found at: http://download.elasticsearch.org/logstash/logstash/packages/debian/logstash_1.5.0.rc3-1_all.deb
+The most current Logstash release can be found at: https://www.elastic.co/downloads/logstash
 
 <i>
-  devops-github@devsrv10:~$ sudo dpkg -i <u>path-to-logstash_1.5.0.rc3-1_all.deb</u> <br>
+  devops-github@devsrv10:~$ sudo dpkg -i <u>path-to-logstash_<_verison_>>.deb</u> <br>
 </i>
 
 Logstash installs itself in /opt/logstash with binaries found in <i>/opt/logstash/bin/</i> and Gemfile found at <i>/opt/logstash/Gemfile</i>. This file is important and we will be covered later in the README file under "Configure Logstash Access to Plugin".
@@ -83,13 +83,11 @@ The lastes version of the plugin is easiest obtained by cloning the repository u
   <br>
   devops-github@devsrv10:~$ git clone https://github.com/bbn-github/logstash-input-bbn_f5networks.git<br>
   Cloning into 'logstash-input-bbn_f5networks'...<br>
-  Username for 'https://github.com':<br>
-  Password for 'https://bbn-github@github.com':<br>
-  remote: Counting objects: 317, done.<br>
-  remote: Compressing objects: 100% (165/165), done.<br>
-  remote: Total 317 (delta 82), reused 0 (delta 0), pack-reused 90<br>
-  Receiving objects: 100% (317/317), 44.67 KiB | 0 bytes/s, done.<br>
-  Resolving deltas: 100% (111/111), done.<br>
+  remote: Counting objects: 702, done.<br>
+  remote: Compressing objects: 100% (23/23), done.<br>
+  remote: Total 702 (delta 10), reused 0 (delta 0), pack-reused 675<br>
+  Receiving objects: 100% (702/702), 97.94 KiB | 0 bytes/s, done.<br>
+  Resolving deltas: 100% (296/296), done.<br>
   Checking connectivity... done.<br>
 </i>
 
@@ -112,7 +110,7 @@ Move into the logstash-input-bbn_f5networks directory and install the bundle dep
   devops-github@devsrv10:~/logstash-input-bbn_f5networks$ bundle install<br>
 </i>
 
-This will install the nessesary gem dependencies for the plugin.
+This will install the necessary gem dependencies for the plugin.
 
 Test the dependencies by running the following command
 
