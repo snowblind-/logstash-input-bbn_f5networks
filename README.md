@@ -150,12 +150,6 @@ input {<br>
 	# Using two plugins written by Baffin Bay Networks<br>
 	# More info and documentatio on https://github.com/bbn-github<br><br>
 
-	# Parsing sflow data from F5 BIG-IP<br>
-    #bbn_sflow {<br>
-        #sflow_collector_port=>6343<br>
-        #sflow_collector_ip=>"172.16.21.41"<br>
-    #}<br><br>
-
 	# Parsing Syslog/CEF log messages from F5 BIG-IP<br>
 	bbn_f5networks {<br>
 		log_collector_ip => "172.16.21.41"<br>
@@ -184,6 +178,8 @@ filter {<br>
 		remove_field => [ "@timestamp" ]<br>
   	}<br><br>
 
+    # If you want to add geo location data to th events you need to<br>
+    # download the goelitecity database and put it in /opt/logstash/<br>
 	if [record_type] == "attack_mitigation_stats" {<br><br>
 
 		if [attack_source_ip] != "" {<br><br>
@@ -272,6 +268,152 @@ The default_health_string is what the BIG-IP sends during health check of the po
 The output used by the configuration is stdout with rubydebug codec. It's just for testing. Select a desired output plugin if different from above.
 
 Save and exit the file.
+
+
+## Bulding the Elasticsearch index and define types
+
+The f5networks plugin are using a predefined set of indexes and types. It's a good practice to define them in advance to make sure that the types are
+correct and and defined and don't colide with other field names of different types.
+
+We use the following indexes and types and be added to Elasticseach by running the below curl commands.
+
+curl -XPUT 'http://localhost:9200/bbn/'
+
+curl -XPUT "http://localhost:9200/bbn/_mapping/attacks" -d '
+	{
+		"attacks" : {
+            "_source" : { "enabled" : "true" },
+            "_timestamp" : { "enabled" : "true", "path" : "device_utc_time", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm" },
+            "properties" : {
+                "customer_id" : { "type" : "integer", "store" : "false" },
+                "device_vendor" : { "type" : "string", "store" : "false" },
+                "device_module" : { "type" : "string", "store" : "false" },
+                "device_version" : { "type" : "string", "store" : "false" },
+                "device_hostname" : { "type" : "string", "store" : "false" },
+                "device_ip" : { "type" : "ip", "store" : "false" },
+                "device_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+                "device_utc_offset" : { "type" : "byte", "store" : "false", "default" : 0 },
+                "policy_name" : { "type" : "string", "store" : "false" },
+                "policy_apply_date" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+                "virtual_context" : { "type" : "string", "store" : "false" },
+                "virtual_routing_table" : { "type" : "integer", "store" : "false", "default" : 0 },
+                "administration_partition" : { "type" : "string", "store" : "false" },
+                "flow_table_id" : { "type" : "string", "store" : "false" },
+                "attack_mlp" : { "type" : "boolean", "store" : "false", "default" : 0 },
+                "attack_name" : { "type" : "string", "store" : "false" },
+                "attack_id" : { "type" : "long", "store" : "false" },
+                "attack_type" : { "type" : "string", "store" : "false" },
+                "attack_status" : { "type" : "string", "store" : "false" },
+                "attack_severity" : { "type" : "byte", "store" : "false" },
+                "attack_category" : { "type" : "string", "store" : "false" },
+                "attack_event_counter" : { "type" : "integer", "store" : "false", "default" : 0 },
+                "attack_ongoing" : { "type" : "boolean", "store" : "false" },
+                "attack_mitigation_method" : { "type" : "string", "store" : "false", "default" : "Unknown" },
+                "attack_source_ip" : { "type" : "string", "store" : "false", "default" : "0.0.0.0" },
+                "attack_source_port" : { "type" : "string", "store" : "false", "default" : "0" },
+                "attack_destination_ip" : { "type" : "string", "store" : "false", "default" : "0.0.0.0" },
+                "attack_destination_port" : { "type" : "string", "store" : "false", "default" : "0" },
+                "attack_start_date" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm" },
+                "attack_end_date" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm" },
+                "unknown_key_value_pair" : { "type" : "string", "store" : "false" },
+                "forward_for" : { "type" : "ip", "store" : "false" },
+				"forward_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+                "record_type" : { "type" : "string", "store" : "false" },
+                "remote_log_format" : { "type" : "string", "store" : "false" },
+                "remote_log_payload" : { "type" : "string", "store" : "false" }
+            }
+        }
+    }'
+
+curl -XPUT "http://localhost:9200/bbn/_mapping/attack_mitigation_methods" -d '
+	{
+		"attack_mitigation_methods" : {
+        	"_source" : { "enabled" : "true" },
+        	"_timestamp" : { "enabled" : "true", "path" : "device_utc_time", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm" },	
+        	"properties" : {
+        		"customer_id" : { "type" : "integer", "store" : "false" },
+        		"device_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+        		"device_utc_offset" : { "type" : "byte", "store" : "false", "default" : 0 },
+        		"attack_id" : { "type" : "long", "store" : "false" },
+        		"attack_type" : { "type" : "string", "store" : "false" },
+        		"attack_mitigation_method" : { "type" : "string", "store" : "false" },
+        		"attack_mitigation_action" : { "type" : "string", "store" : "false" },
+        		"forward_for" : { "type" : "ip", "store" : "false" },
+				"forward_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+        		"record_type" : { "type" : "string", "store" : "false" }
+        	}
+        }
+    }'
+    
+curl -XPUT "http://localhost:9200/bbn/_mapping/attack_mitigation_stats" -d '
+	{
+		"attack_mitigation_stats": {
+        	"_source" : { "enabled" : "true" },
+        	"_timestamp" : { "enabled" : "true", "path" : "device_utc_time", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm" },
+        	"properties" : {
+        		"customer_id" : { "type" : "integer", "store" : "false" },
+        		"device_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "default" : "1970-01-01T00:00:00", "store" : "false" },
+        		"device_utc_offset" : { "type" : "byte", "store" : "false", "default" : 0 },
+        		"attack_id" : { "type" : "long", "store" : "false" },
+        		"attack_type" : { "type" : "string", "store" : "false" },
+        		"attack_status" : { "type" : "string", "store" : "false" },
+        		"attack_severity" : { "type" : "integer", "store" : "false" },
+        		"attack_detection_rate" : { "type" : "integer", "store" : "false" },
+                "attack_detection_matrix" : { "type" : "string", "store" : "false" },
+                "attack_detection_method" : { "type" : "string", "store" : "false" },
+                "attack_drop_rate" : { "type" : "integer", "store" : "false" },
+                "attack_drop_matrix" : { "type" : "string", "store" : "false" },
+                "attack_mitigation_method" : { "type" : "string", "store" : "false" },
+        		"attack_mitigation_action" : { "type" : "string", "store" : "false" },
+        		"attack_request_resource" : { "type" : "string", "store" : "false" },
+        		"attack_dns_query_name" : { "type" : "string", "store" : "false" },
+                "attack_dns_query_type" : { "type" : "string", "store" : "false" },
+                "attack_source_ip" : { "type" : "string", "store" : "false" },
+                "attack_source_port" : { "type" : "string", "store" : "false" },
+                "attack_source_vlan" : { "type" : "string", "store" : "false" },
+                "attack_destination_ip" : { "type" : "string", "store" : "false" },
+                "attack_destination_port" : { "type" : "string", "store" : "false" },
+                "attack_destination_vlan" : { "type" : "string", "store" : "false" },
+                "forward_for" : { "type" : "ip", "store" : "false" },
+				"forward_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+        		"record_type" : { "type" : "string", "store" : "false" },
+        		"remote_log_format" : { "type" : "string", "store" : "false" },
+        		"remote_log_payload" : { "type" : "string", "store" : "false" }
+        	}
+        }
+	
+	}'
+
+curl -XPUT "http://localhost:9200/bbn/_mapping/traffic_stats" -d '
+	{
+		"traffic_stats": {
+        	"_source" : { "enabled" : "true" },
+        	"_timestamp" : { "enabled" : "true", "path" : "device_utc_time", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm" },
+        	"properties" : {
+        		"customer_id" : { "type" : "integer", "store" : "false" },
+        		"device_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+        		"device_utc_offset" : { "type" : "byte", "store" : "false", "default" : 0 },
+        		"device_vendor" : { "type" : "string", "store" : "false" },
+                "device_module" : { "type" : "string", "store" : "false" },
+                "device_version" : { "type" : "string", "store" : "false" },
+                "device_hostname" : { "type" : "string", "store" : "false" },
+                "device_ip" : { "type" : "ip", "store" : "false" },
+                "virtual_context" : { "type" : "string", "store" : "false" },
+                "traffic_stat_type" : { "type" : "string", "store" : "false" },
+                "traffic_stat_counter" : { "type" : "integer", "store" : "false" },
+                "cookie_challenge_issued" : { "type" : "integer", "store" : "false" },
+                "cookie_challenge_passed" : { "type" : "integer", "store" : "false" },
+                "cookie_flow_accepted" : { "type" : "integer", "store" : "false" },
+                "cookie_flow_rejected" : { "type" : "integer", "store" : "false" },
+                "forward_for" : { "type" : "ip", "store" : "false" },
+				"forward_utc_time" : { "type" : "date", "format" : "yyyy-MM-dd'\''T'\''HH:mm:ss'\''+'\''HH:mm", "store" : "false" },
+                "record_type" : { "type" : "string", "store" : "false" },
+                "remote_log_format" : { "type" : "string", "store" : "false" },
+                "remote_log_payload" : { "type" : "string", "store" : "false" }
+			}
+		}
+	}'
+
 
 To execute Logstash with the configuration run the following command
 
