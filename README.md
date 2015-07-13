@@ -118,7 +118,7 @@ Test the dependencies by running the following command
   devops-github@devsrv10:~/logstash-input-bbn_f5networks$ bundle exec rspec<br>
 </i>
 
-If you don't get any errors running the two commands above you are finshed with the plugin installation.
+If you don't get any errors running the two commands above you are finished with the plugin installation.
 
 ## Configure Logstash Access to Plugin
 The current version (RC3) of Logstash 1.5.0 has a problem with the plugin binary which stops you from installing the binary in the way it was intended to. We have been told that this will work in the GA release. Until then we have to run the plugin in the same way we do during developmemnt.
@@ -127,22 +127,23 @@ Edit Logstash Gem file and add the following line to the file right after the ge
 
 <i>
   gem "logstash-input-bbn_f5networks", :path => "/home/devops-github/logstash-input-bbn_f5networks"
+  gem "hashie"
 </i>
 
-Save and exit the file and run the followoing command to have Logstash read in the new Gemfile.
+Save and exit the file and run the following command to have Logstash read in the new Gemfile and install dependencies.
 
 <i>
-  devops-github@devsrv10:~/logstash-input-bbn_f5networks$ sudo /opt/logstash/bin/plugin --no-verify<br>
+  sudo /opt/logstash/bin/plugin --no-verify<br>
 </i>
 
 ## Creating a config file for Logstash
 At this point you are ready to run Lostash with the new plugin.
 
-Create a configuration file for Logstash by creating a file in the follwoing directory
+Create a configuration file for Logstash by creating a file in the following directory
 
 devops-github@devsrv10:~/logstash-input-bbn_f5networks$ sudo vi /etc/logstash/conf.d/bbn.conf 
 
-Add the follwoing configuration to the file
+Add the following configuration to the file
 
 <i>
 input {<br>
@@ -270,7 +271,7 @@ The output used by the configuration is stdout with rubydebug codec. It's just f
 Save and exit the file.
 
 
-## Bulding the Elasticsearch index and define types
+## Building the Elasticsearch index and define types
 
 The f5networks plugin are using a predefined set of indexes and types. It's a good practice to define them in advance to make sure that the types are
 correct and and defined and don't colide with other field names of different types.
