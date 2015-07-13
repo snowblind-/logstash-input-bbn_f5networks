@@ -147,44 +147,34 @@ Add the following configuration to the file
 
 <i>
 input {<br>
-
 	# Using two plugins written by Baffin Bay Networks<br>
 	# More info and documentatio on https://github.com/bbn-github<br><br>
-
 	# Parsing Syslog/CEF log messages from F5 BIG-IP<br>
 	bbn_f5networks {<br>
 		log_collector_ip => "172.16.21.41"<br>
 		log_collector_port => 1514<br>
         log_collector_protocol => [ "udp", "tcp" ]<br>
 		mlp_support => 1<br><br>
-	
 		# We need to normalize time for events between  different<br>
 		# devices. This is done by specifying the offset from UTC time per<br>
 		# remote device IP. IP is eqaul the management IP of the BIG-IP even<br>
 		# if a self IP is used for HSL logging.<br>
 		explicit_utc_offset => ["172.16.21.40","+2"]<br><br>
-
 		# This is a global configured value, applies to all remote BIG-IP's<br>
 		default_health_string => "default send string"<br><br>
-
 		# Overrides the global default_health_string for induvidual BIG-IP's<br>
 		#remote_health_string => ["172.16.21.40"=>"default_health_string"]<br>
 	}<br>
 }<br><br>
-
 filter {<br>
-
 	mutate {<br>
    		remove_field => [ "@version" ]<br>
 		remove_field => [ "@timestamp" ]<br>
   	}<br><br>
-
     # If you want to add geo location data to th events you need to<br>
     # download the goelitecity database and put it in /opt/logstash/<br>
 	if [record_type] == "attack_mitigation_stats" {<br><br>
-
 		if [attack_source_ip] != "" {<br><br>
-			
 			geoip {<br>
     				source => "attack_source_ip"<br>
     				target => "geoip"<br>
@@ -192,25 +182,18 @@ filter {<br>
     				add_field => [ "[geoip][coordinates]", "%{[geoip][longitude]}" ]<br>
     				add_field => [ "[geoip][coordinates]", "%{[geoip][latitude]}"  ]<br>
   			}<br><br>
-
 			mutate {<br>
     				convert => [ "[geoip][coordinates]", "float" ]<br>
   			}<br><br>
-
 		}<br><br>
-
 	}<br><br>
-
 }<br><br>
-
 output {<br><br>
-
 	# Only used for debug; in the case yu need to debug don't start logstash in daemon mode<br>
         # #sudo /opt/logstash/bin/logstash -f /etc/logstash/conf.d/bbn.conf<br>
         #stdout {<br>
         #       codec => rubydebug<br>
         #}<br><br>
-
 	# Store data in elasticsearch<br>
 	if [record_type] == "attack_mitigation_stats" {<br>
 		 stdout {<br>
@@ -221,18 +204,15 @@ output {<br><br>
 			index=>"bbn"<br>
 			document_type=>"attack_mitigation_stats"<br>
 		}<br><br>
-
 	 } else if [record_type] == "attacks" {<br>
         	stdout {<br>
                 	codec => rubydebug<br>
         	}<br><br>
-
 	       elasticsearch {<br>
                         host=>"localhost"<br>
                         index=>"bbn"<br>
                         document_type=>"attacks"<br>
                 }<br><br>
-        
 	} else if [record_type] == "attack_mitigation_methods" {<br>
 		 stdout {<br>
                         codec => rubydebug<br>
@@ -242,18 +222,15 @@ output {<br><br>
 			index=>"bbn"<br>
 			document_type=>"attack_mitigation_methods"<br>
 		}<br><br>
-
 	} else if [record_type] == "traffic_stats" {<br>
                 stdout {<br>
                         codec => rubydebug<br>
                 }<br><br>
-
                elasticsearch {<br>
                         host=>"localhost"<br>
                         index=>"bbn"<br>
                         document_type=>"traffic_stats"<br>
                 }<br><br>
-
 	} else {<br>
 		stdout {<br>
                 	codec => rubydebug<br>
