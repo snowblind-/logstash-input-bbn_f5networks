@@ -381,7 +381,6 @@ curl -XPUT "http://localhost:9200/bbn/_mapping/attack_mitigation_stats" -d '
         		"remote_log_payload" : { "type" : "string", "store" : "false" }
         	}
         }
-	
 	}'
 
 curl -XPUT "http://localhost:9200/bbn/_mapping/traffic_stats" -d '
