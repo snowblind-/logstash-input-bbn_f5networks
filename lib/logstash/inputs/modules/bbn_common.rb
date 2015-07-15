@@ -54,7 +54,9 @@ class BBNCommon
 
     ndt = DateTime.new(tdt.year,tdt.month,tdt.day,tdt.hour,tdt.min,tdt.sec,offset)
 
-    return ndt.new_offset(0).to_s
+    ndt = ndt.new_offset(0)
+
+    return ndt.strftime("%FT%T")
 
   end
 
