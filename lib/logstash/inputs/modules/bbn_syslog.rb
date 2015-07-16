@@ -87,7 +87,7 @@ class BBNSyslog
 
           elsif entry[0] == "date_time" and entry[1] != nil then sample_hash["device_utc_time"] = entry[1]
 
-          elsif entry[0] == "context_name" and entry[1] != "" then sample_hash["virtual_context"] = entry[1]
+          elsif entry[0] == "context_name" and entry[1] != nil then sample_hash["virtual_context"] = entry[1]
 
           elsif entry[0] == "errdefs_msg_name" and entry[1] != nil then sample_hash["attack_category"] = entry[1]
 
@@ -101,7 +101,7 @@ class BBNSyslog
 
         end
 
-        if sample_hash.has_key?("virtual_context") and sample_hash["virtual_context"] != ""
+        if sample_hash.has_key?("virtual_context")
 
           sample_hash["attack_mitigation_method"] = "Virtual Server Rate Limiting"
 
